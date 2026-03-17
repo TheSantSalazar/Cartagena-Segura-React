@@ -1,32 +1,26 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Shield, Home, AlertTriangle, Map, Phone, LogOut, Bell } from 'lucide-react'
+import { Home, AlertTriangle, Map, Phone, LogOut, Bell } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 
 const navItems = [
-  { to: '/app',           icon: Home,           label: 'Inicio',      end: true },
-  { to: '/app/incidents', icon: AlertTriangle,  label: 'Mis Reportes' },
-  { to: '/app/map',       icon: Map,            label: 'Mapa'         },
-  { to: '/app/emergency', icon: Phone,          label: 'Emergencias'  },
+  { to: '/app',           icon: Home,          label: 'Inicio',      end: true },
+  { to: '/app/incidents', icon: AlertTriangle, label: 'Mis Reportes' },
+  { to: '/app/map',       icon: Map,           label: 'Mapa'         },
+  { to: '/app/emergency', icon: Phone,         label: 'Emergencias'  },
 ]
 
 export default function CitizenLayout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    logout()
-    navigate('/login')
-  }
+  const handleLogout = () => { logout(); navigate('/login') }
 
   return (
     <div className="flex flex-col h-screen bg-gray-50">
-
       {/* TOP BAR */}
       <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-primary-600 rounded-xl flex items-center justify-center">
-            <Shield className="w-4 h-4 text-white" />
-          </div>
+          <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura" className="w-8 h-8 rounded-xl object-contain" />
           <span className="font-bold text-gray-900 text-sm">Cartagena Segura</span>
         </div>
         <div className="flex items-center gap-3">
@@ -47,13 +41,12 @@ export default function CitizenLayout() {
         </div>
       </header>
 
-      {/* PAGE CONTENT */}
       <main className="flex-1 overflow-auto pb-20">
         <Outlet />
       </main>
 
       {/* BOTTOM NAV */}
-      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg safe-area-bottom">
+      <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg">
         <div className="flex items-center justify-around px-2 py-2">
           {navItems.map(({ to, icon: Icon, label, end }) => (
             <NavLink key={to} to={to} end={end}
