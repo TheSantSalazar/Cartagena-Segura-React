@@ -23,14 +23,14 @@ const createIcon = (color) => L.divIcon({
 })
 
 const StatCard = ({ icon: Icon, label, value, color, sub }) => (
-  <div className="card p-6">
-    <div className="flex items-center justify-between mb-4">
-      <span className="text-sm font-medium text-gray-500">{label}</span>
-      <div className={`w-10 h-10 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon className="w-5 h-5" />
+  <div className="card p-4 sm:p-6">
+    <div className="flex items-center justify-between mb-3 sm:mb-4">
+      <span className="text-xs sm:text-sm font-medium text-gray-500">{label}</span>
+      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ${color}`}>
+        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
       </div>
     </div>
-    <p className="text-3xl font-bold text-gray-900">{value ?? '—'}</p>
+    <p className="text-2xl sm:text-3xl font-bold text-gray-900">{value ?? '—'}</p>
     {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
   </div>
 )
@@ -52,37 +52,32 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  const pending  = incidents.filter(i => i.status === 'PENDING').length
-  const resolved = incidents.filter(i => i.status === 'RESOLVED').length
-  const critical = incidents.filter(i => i.priority === 'CRITICAL').length
+  const pending    = incidents.filter(i => i.status === 'PENDING').length
+  const resolved   = incidents.filter(i => i.status === 'RESOLVED').length
+  const critical   = incidents.filter(i => i.priority === 'CRITICAL').length
   const withCoords = incidents.filter(i => i.latitude && i.longitude)
 
   return (
-    <div className="p-6 space-y-6 animate-fade-in">
+    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 animate-fade-in">
       <div>
-        <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
+        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
         <p className="text-sm text-gray-500 mt-0.5">Resumen general del sistema</p>
       </div>
 
-      {/* Stats */}
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-4">
-        <StatCard icon={AlertTriangle} label="Total Incidentes" value={incidents.length}
-          color="bg-blue-50 text-blue-600" sub="reportados en el sistema" />
-        <StatCard icon={Clock} label="Pendientes" value={pending}
-          color="bg-yellow-50 text-yellow-600" sub="requieren atención" />
-        <StatCard icon={CheckCircle} label="Resueltos" value={resolved}
-          color="bg-green-50 text-green-600" sub="casos cerrados" />
-        <StatCard icon={XCircle} label="Críticos" value={critical}
-          color="bg-red-50 text-red-600" sub="prioridad máxima" />
+      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
+        <StatCard icon={AlertTriangle} label="Total" value={incidents.length} color="bg-blue-50 text-blue-600" sub="incidentes" />
+        <StatCard icon={Clock} label="Pendientes" value={pending} color="bg-yellow-50 text-yellow-600" sub="sin atender" />
+        <StatCard icon={CheckCircle} label="Resueltos" value={resolved} color="bg-green-50 text-green-600" sub="cerrados" />
+        <StatCard icon={XCircle} label="Críticos" value={critical} color="bg-red-50 text-red-600" sub="urgentes" />
       </div>
 
       {/* Map */}
       <div className="card overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">Mapa de Incidentes</h2>
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Mapa de Incidentes</h2>
           <span className="text-xs text-gray-400">{withCoords.length} con ubicación</span>
         </div>
-        <div style={{ height: '400px', zIndex: 0 }}>
+        <div style={{ height: '300px', zIndex: 0 }} className="sm:h-96">
           <MapContainer center={CENTER} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
             <TileLayer
               attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
@@ -92,7 +87,7 @@ export default function AdminDashboard() {
               <Marker key={inc.id} position={[inc.latitude, inc.longitude]}
                 icon={createIcon(priorityColor[inc.priority] ?? '#6b7280')}>
                 <Popup>
-                  <div className="p-1 min-w-[160px]">
+                  <div className="p-1 min-w-[140px]">
                     <p className="font-bold text-gray-900 text-sm">{inc.type}</p>
                     <p className="text-xs text-gray-500 mt-1">{inc.description}</p>
                     {inc.location && <p className="text-xs text-gray-400 mt-1">📍 {inc.location}</p>}
@@ -114,8 +109,8 @@ export default function AdminDashboard() {
 
       {/* Recent Incidents */}
       <div className="card">
-        <div className="px-6 py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900">Incidentes Recientes</h2>
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between">
+          <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Incidentes Recientes</h2>
           <span className="text-xs text-gray-400">{incidents.length} total</span>
         </div>
         <div className="divide-y divide-gray-50">
@@ -124,27 +119,26 @@ export default function AdminDashboard() {
           ) : incidents.length === 0 ? (
             <div className="p-8 text-center text-gray-400 text-sm">No hay incidentes registrados</div>
           ) : incidents.slice(0, 8).map(inc => (
-            <div key={inc.id} className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+            <div key={inc.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-gray-50">
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-gray-900 truncate">{inc.type}</p>
                 <p className="text-xs text-gray-400 truncate">{inc.description}</p>
               </div>
-              <span className={badgeColor[inc.priority] ?? 'badge-low'}>{inc.priority}</span>
+              <span className={`${badgeColor[inc.priority] ?? 'badge-low'} hidden sm:inline-flex`}>{inc.priority}</span>
               <span className="text-xs text-gray-400 whitespace-nowrap">{statusLabel[inc.status]}</span>
             </div>
           ))}
         </div>
       </div>
 
-      {/* Zones */}
       {zones.length > 0 && (
         <div className="card">
-          <div className="px-6 py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900">Zonas Registradas</h2>
+          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
+            <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Zonas Registradas</h2>
           </div>
           <div className="divide-y divide-gray-50">
             {zones.map(zone => (
-              <div key={zone.id} className="px-6 py-4 flex items-center gap-4 hover:bg-gray-50 transition-colors">
+              <div key={zone.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-4 hover:bg-gray-50">
                 <div className="flex-1">
                   <p className="text-sm font-medium text-gray-900">{zone.name}</p>
                   <p className="text-xs text-gray-400">{zone.totalIncidents ?? 0} incidentes</p>

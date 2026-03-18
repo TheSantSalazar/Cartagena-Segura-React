@@ -11,7 +11,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const navigate = useNavigate()
   const { login } = useAuthStore()
-
   const { register, handleSubmit, formState: { errors } } = useForm()
 
   const onSubmit = async (data) => {
@@ -22,29 +21,23 @@ export default function LoginPage() {
       login({ username, roles }, token)
       toast.success(`¡Bienvenido, ${username}!`)
       navigate(roles?.includes('ROLE_ADMIN') ? '/admin' : '/app')
-    } catch {
-    } finally {
-      setLoading(false)
-    }
+    } catch {} finally { setLoading(false) }
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-primary-950 via-primary-900 to-primary-800 flex items-center justify-center p-4">
       <div className="absolute inset-0 opacity-10"
         style={{ backgroundImage: 'linear-gradient(rgba(255,255,255,.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.1) 1px, transparent 1px)', backgroundSize: '40px 40px' }} />
-
-      <div className="relative w-full max-w-md animate-slide-up">
-        {/* Logo */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-20 h-20 bg-white/10 border border-white/20 rounded-2xl mb-4 backdrop-blur">
-            <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura" className="w-14 h-14 object-contain" />
+      <div className="relative w-full max-w-sm sm:max-w-md animate-slide-up">
+        <div className="text-center mb-6 sm:mb-8">
+          <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/10 border border-white/20 rounded-2xl mb-4 backdrop-blur">
+            <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura" className="w-10 h-10 sm:w-14 sm:h-14 object-contain" />
           </div>
-          <h1 className="text-3xl font-bold text-white tracking-tight">Cartagena Segura</h1>
-          <p className="text-primary-300 text-sm mt-1">Sistema de Seguridad Ciudadana</p>
+          <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Cartagena Segura</h1>
+          <p className="text-primary-300 text-xs sm:text-sm mt-1">Sistema de Seguridad Ciudadana</p>
         </div>
-
-        <div className="bg-white/95 backdrop-blur rounded-3xl shadow-2xl p-8">
-          <h2 className="text-xl font-bold text-gray-900 mb-6">Iniciar Sesión</h2>
+        <div className="bg-white/95 backdrop-blur rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8">
+          <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-5 sm:mb-6">Iniciar Sesión</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
               <label className="label">Usuario</label>
@@ -69,7 +62,7 @@ export default function LoginPage() {
               {loading ? 'Ingresando...' : 'Ingresar'}
             </button>
           </form>
-          <p className="text-center text-sm text-gray-500 mt-6">
+          <p className="text-center text-sm text-gray-500 mt-5 sm:mt-6">
             ¿No tienes cuenta?{' '}
             <Link to="/register" className="text-primary-600 font-semibold hover:underline">Regístrate</Link>
           </p>
