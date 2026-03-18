@@ -32,10 +32,12 @@ export const zoneService = {
 
 // ── NOTIFICATIONS ─────────────────────────────────────────────────────────
 export const notificationService = {
-  getUnread:   ()   => api.get('/notifications/unread'),
-  countUnread: ()   => api.get('/notifications/unread/count'),
-  markRead:    (id) => api.patch(`/notifications/${id}/read`),
-  markAllRead: ()   => api.patch('/notifications/read-all'),
+  getAll:        ()   => api.get('/notifications'),
+  getUnread:     ()   => api.get('/notifications/unread'),
+  countUnread:   ()   => api.get('/notifications/unread/count'),
+  markAsRead:    (id) => api.patch(`/notifications/${id}/read`),
+  markAllAsRead: ()   => api.patch('/notifications/read-all'),
+  delete:        (id) => api.delete(`/notifications/${id}`),
 }
 
 // ── EMERGENCY CONTACTS ────────────────────────────────────────────────────
@@ -53,6 +55,6 @@ export const logService = {
 
 // ── REPORTS ───────────────────────────────────────────────────────────────
 export const reportService = {
-  getAll:    (params) => api.get('/reports', { params }),
-  generate:  (data)   => api.post('/reports', data),
+  getAll:   (params) => api.get('/reports', { params }),
+  generate: (data)   => api.post('/reports', data),
 }

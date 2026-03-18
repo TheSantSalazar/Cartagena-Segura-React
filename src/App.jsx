@@ -19,6 +19,7 @@ import CitizenIncidents from '@/pages/citizen/CitizenIncidents'
 import CitizenMap       from '@/pages/citizen/CitizenMap'
 import CitizenEmergency from '@/pages/citizen/CitizenEmergency'
 import CitizenReports   from '@/pages/citizen/CitizenReports'
+import CitizenProfile   from '@/pages/citizen/CitizenProfile'
 
 const PrivateRoute = ({ children }) => {
   const { token } = useAuthStore()
@@ -45,6 +46,7 @@ export default function App() {
         <Route path="map"         element={<CitizenMap />} />
         <Route path="emergency"   element={<CitizenEmergency />} />
         <Route path="analytics"   element={<CitizenReports />} />
+        <Route path="profile"     element={<CitizenProfile />} />
       </Route>
 
       <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>

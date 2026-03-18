@@ -2,7 +2,8 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 
 const api = axios.create({
-  baseURL: 'https://cartagena-segura-def.onrender.com/api' , //'http://localhost:8080/api'
+  baseURL: //'https://cartagena-segura-def.onrender.com/api' , 
+            'http://localhost:8080/api',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })
