@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, AlertTriangle, Map, FileText, Phone, LogOut, Menu, X } from 'lucide-react'
+import { LayoutDashboard, AlertTriangle, Map, FileText, Phone, LogOut, Menu, X, BarChart2 } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 
 const navItems = [
@@ -9,6 +9,7 @@ const navItems = [
   { to: '/admin/zones',     icon: Map,             label: 'Zonas'       },
   { to: '/admin/emergency', icon: Phone,           label: 'Emergencias' },
   { to: '/admin/logs',      icon: FileText,        label: 'Logs'        },
+  { to: '/admin/reports',    icon: BarChart2,       label: 'Reportes'    },
 ]
 
 export default function AdminLayout() {

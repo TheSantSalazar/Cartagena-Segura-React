@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { Home, AlertTriangle, Map, Phone, LogOut, Bell } from 'lucide-react'
+import { Home, AlertTriangle, Map, Phone, LogOut, Bell, BarChart2 } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 
 const navItems = [
@@ -7,6 +7,7 @@ const navItems = [
   { to: '/app/incidents', icon: AlertTriangle, label: 'Mis Reportes' },
   { to: '/app/map',       icon: Map,           label: 'Mapa'         },
   { to: '/app/emergency', icon: Phone,         label: 'Emergencias'  },
+  { to: '/app/analytics',  icon: BarChart2,     label: 'Análisis'     },
 ]
 
 export default function CitizenLayout() {
@@ -20,7 +21,7 @@ export default function CitizenLayout() {
       {/* TOP BAR */}
       <header className="bg-white border-b border-gray-100 px-4 py-3 flex items-center justify-between shrink-0 shadow-sm">
         <div className="flex items-center gap-2.5">
-          <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura" className="w-8 h-8 rounded-xl object-contain" />
+          <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura" className="w-8 h-8 rounded-xl object-cover" />
           <span className="font-bold text-gray-900 text-sm">Cartagena Segura</span>
         </div>
         <div className="flex items-center gap-3">
