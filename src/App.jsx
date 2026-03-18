@@ -1,6 +1,9 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
 import useAuthStore from '@/store/authStore'
 
+// Landing
+import LandingPage  from '@/pages/LandingPage'
+
 // Auth
 import LoginPage    from '@/pages/auth/LoginPage'
 import RegisterPage from '@/pages/auth/RegisterPage'
@@ -37,9 +40,9 @@ export default function App() {
   return (
     <Routes>
       {/* Public */}
+      <Route path="/"         element={<LandingPage />} />
       <Route path="/login"    element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
-      <Route path="/"         element={<Navigate to="/login" replace />} />
 
       {/* Citizen */}
       <Route path="/app" element={<PrivateRoute><CitizenLayout /></PrivateRoute>}>
