@@ -40,8 +40,8 @@ export default function LoginPage() {
           <h2 className="text-lg sm:text-xl font-bold text-gray-900 mb-5 sm:mb-6">Iniciar Sesión</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="label">Usuario</label>
-              <input className="input" placeholder="tu_usuario"
+              <label className="label">Usuario, correo o teléfono</label>
+              <input className="input" placeholder="usuario / correo@email.com / 300..."
                 {...register('username', { required: 'Campo requerido' })} />
               {errors.username && <p className="text-red-500 text-xs mt-1">{errors.username.message}</p>}
             </div>
