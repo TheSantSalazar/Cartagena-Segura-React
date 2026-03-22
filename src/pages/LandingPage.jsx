@@ -122,9 +122,11 @@ export default function LandingPage() {
 
       <header className="relative overflow-hidden bg-gradient-to-br from-slate-950 via-primary-950 to-primary-900 pt-28 sm:pt-32">
         <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,.2) 1px, transparent 0)', backgroundSize: '28px 28px' }} />
+        <div className="pointer-events-none absolute -left-24 top-8 h-72 w-72 rounded-full bg-primary-500/20 blur-3xl animate-blob" />
+        <div className="pointer-events-none absolute -right-20 bottom-4 h-64 w-64 rounded-full bg-blue-400/20 blur-3xl animate-blob animation-delay-2000" />
         <div className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24">
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_.9fr]">
-            <div>
+            <div className="animate-fade-up">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-primary-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 Plataforma moderna para ciudades más seguras
@@ -136,7 +138,7 @@ export default function LandingPage() {
                 Cartagena Segura centraliza reportes, monitoreo y comunicación entre ciudadanía y autoridades en una sola experiencia profesional.
               </p>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary-900 shadow-lg shadow-primary-950/30 transition hover:bg-primary-50">
+                <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary-900 shadow-lg shadow-primary-950/30 transition hover:bg-primary-50 hover:-translate-y-0.5">
                   Empezar ahora
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -146,15 +148,28 @@ export default function LandingPage() {
               </div>
             </div>
 
-            <div className="rounded-3xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
-              <p className="mb-4 text-sm font-semibold text-white">Indicadores clave de la plataforma</p>
-              <div className="grid grid-cols-2 gap-3">
-                {stats.map((stat) => (
-                  <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 text-center">
-                    <p className="text-2xl font-bold text-white">{stat.value}</p>
-                    <p className="mt-1 text-xs text-primary-200">{stat.label}</p>
-                  </div>
-                ))}
+            <div className="space-y-4 animate-fade-up-delay">
+              <div className="rounded-3xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
+                <p className="mb-4 text-sm font-semibold text-white">Indicadores clave de la plataforma</p>
+                <div className="grid grid-cols-2 gap-3">
+                  {stats.map((stat) => (
+                    <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 text-center transition hover:bg-white/20">
+                      <p className="text-2xl font-bold text-white">{stat.value}</p>
+                      <p className="mt-1 text-xs text-primary-200">{stat.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-white/10 p-3 backdrop-blur-xl">
+                <img
+                  src="/hero-monitoring.svg"
+                  alt="Centro urbano vigilado con tecnología de monitoreo"
+                  className="h-48 w-full rounded-2xl object-cover"
+                />
+                <div className="absolute inset-x-6 bottom-6 rounded-xl bg-slate-950/60 px-4 py-2 text-xs font-medium text-white backdrop-blur">
+                  Visualización estratégica para decisiones más rápidas
+                </div>
               </div>
             </div>
           </div>
@@ -165,7 +180,7 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl rounded-3xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-8">
           <div className="grid gap-6 md:grid-cols-3">
             {pillars.map((pillar) => (
-              <div key={pillar.title} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
+              <div key={pillar.title} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5 transition duration-300 hover:-translate-y-1 hover:shadow-md">
                 <div className="mb-3 inline-flex rounded-xl bg-primary-50 p-2 text-primary-700">
                   <pillar.icon className="h-5 w-5" />
                 </div>
@@ -188,8 +203,8 @@ export default function LandingPage() {
           </div>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {features.map((feature) => (
-              <article key={feature.title} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg">
-                <div className={`mb-4 inline-flex rounded-2xl p-3 ${feature.color}`}>
+              <article key={feature.title} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+                <div className={`mb-4 inline-flex rounded-2xl p-3 transition group-hover:scale-105 ${feature.color}`}>
                   <feature.icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">{feature.title}</h3>
@@ -208,7 +223,7 @@ export default function LandingPage() {
           </div>
           <div className="grid gap-5 md:grid-cols-3">
             {journey.map((item) => (
-              <div key={item.step} className="relative rounded-3xl border border-slate-200 bg-slate-50 p-6">
+              <div key={item.step} className="relative rounded-3xl border border-slate-200 bg-slate-50 p-6 transition duration-300 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md">
                 <span className="mb-4 inline-flex rounded-xl bg-primary-600 px-3 py-1 text-xs font-semibold tracking-wide text-white">
                   Paso {item.step}
                 </span>
@@ -221,15 +236,27 @@ export default function LandingPage() {
       </section>
 
       <section className="bg-gradient-to-br from-primary-950 via-primary-900 to-slate-900 py-16 sm:py-20">
-        <div className="mx-auto flex max-w-4xl flex-col items-center px-4 text-center sm:px-6">
-          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Eleva la seguridad de tu comunidad</h2>
-          <p className="mt-4 max-w-2xl text-sm leading-relaxed text-primary-200 sm:text-base">
-            Únete hoy y transforma la forma en que Cartagena reporta y gestiona incidentes con una plataforma de nivel profesional.
-          </p>
-          <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3 text-sm font-bold text-primary-900 shadow-lg shadow-primary-950/30 transition hover:bg-primary-50">
-            Crear cuenta gratis
-            <ArrowRight className="h-4 w-4" />
-          </Link>
+        <div className="mx-auto grid max-w-5xl items-center gap-8 px-4 sm:px-6 lg:grid-cols-2">
+          <div>
+            <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">Eleva la seguridad de tu comunidad</h2>
+            <p className="mt-4 max-w-2xl text-sm leading-relaxed text-primary-200 sm:text-base">
+              Únete hoy y transforma la forma en que Cartagena reporta y gestiona incidentes con una plataforma de nivel profesional.
+            </p>
+            <Link to="/register" className="mt-8 inline-flex items-center gap-2 rounded-2xl bg-white px-7 py-3 text-sm font-bold text-primary-900 shadow-lg shadow-primary-950/30 transition hover:bg-primary-50 hover:-translate-y-0.5">
+              Crear cuenta gratis
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="relative">
+            <img
+              src="/community-team.svg"
+              alt="Equipo ciudadano coordinando acciones de seguridad"
+              className="h-72 w-full rounded-3xl object-cover shadow-2xl ring-1 ring-white/20"
+            />
+            <div className="absolute -bottom-4 -left-4 rounded-2xl border border-white/20 bg-slate-900/70 px-4 py-3 text-xs text-primary-100 backdrop-blur">
+              +40 barrios conectados con notificaciones activas
+            </div>
+          </div>
         </div>
       </section>
 
