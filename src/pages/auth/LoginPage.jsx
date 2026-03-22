@@ -17,8 +17,8 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const res = await authService.login(data)
-      const { token, username, roles } = res.data.data
-      login({ username, roles }, token)
+      const { token, username, roles, fullName, email, phone } = res.data.data
+      login({ username, roles, fullName, email, phone }, token)
       toast.success(`¡Bienvenido, ${username}!`)
       navigate(roles?.includes('ROLE_ADMIN') ? '/admin' : '/app')
     } catch {} finally { setLoading(false) }
