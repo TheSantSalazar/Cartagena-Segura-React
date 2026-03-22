@@ -9,7 +9,7 @@ export default function CitizenReports() {
         <div className="w-full" style={{ height: 'calc(100vh - 220px)', minHeight: '450px' }}>
           <iframe
             title="Cartagena Segura - Estadísticas"
-            src="https://app.powerbi.com/view?r=eyJrIjoiYTY3OTc3ZGYtNjMzMi00OGFlLWE4ZWQtYTQyNmMxZGM1NjcxIiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
+            src="https://app.powerbi.com/view?r=eyJrIjoiYjQ3MmQ5NjgtY2M5Yi00NGNlLTg3ODktOTQ5NDkzNDkzOTI5IiwidCI6IjlkMTJiZjNmLWU0ZjYtNDdhYi05MTJmLTFhMmYwZmM0OGFhNCIsImMiOjR9"
             frameBorder="0"
             allowFullScreen
             className="w-full h-full"
