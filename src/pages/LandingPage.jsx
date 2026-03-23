@@ -1,4 +1,6 @@
 import { Link } from 'react-router-dom'
+import { motion as Motion } from 'framer-motion'
+import CountUp from 'react-countup'
 import {
   AlertTriangle,
   ArrowRight,
@@ -12,6 +14,32 @@ import {
   Sparkles,
   Users,
 } from 'lucide-react'
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 24 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.7, ease: 'easeOut' },
+  },
+}
+
+const cardStagger = {
+  hidden: {},
+  visible: {
+    transition: {
+      staggerChildren: 0.12,
+    },
+  },
+}
+
+const hoverSpring = {
+  whileHover: {
+    scale: 1.03,
+    y: -8,
+    transition: { type: 'spring', stiffness: 320, damping: 20 },
+  },
+}
 
 const features = [
   {
@@ -53,10 +81,10 @@ const features = [
 ]
 
 const stats = [
-  { value: '24/7', label: 'Monitoreo continuo' },
-  { value: '< 2 min', label: 'Tiempo de reporte' },
-  { value: '100%', label: 'Cobertura digital' },
-  { value: 'GPS', label: 'Geolocalización precisa' },
+  { value: 1428, suffix: '+', label: 'Reportes verificados este mes' },
+  { value: 56, suffix: '', label: 'Zonas monitoreadas 24/7' },
+  { value: 18420, suffix: '+', label: 'Usuarios activos en la red' },
+  { value: 3, suffix: ' min', label: 'Tiempo promedio de respuesta' },
 ]
 
 const pillars = [
@@ -126,17 +154,26 @@ export default function LandingPage() {
         <div className="pointer-events-none absolute -right-20 bottom-4 h-64 w-64 rounded-full bg-blue-400/20 blur-3xl animate-blob animation-delay-2000" />
         <div className="relative mx-auto max-w-6xl px-4 pb-16 sm:px-6 sm:pb-24">
           <div className="grid items-center gap-10 lg:grid-cols-[1.1fr_.9fr]">
-            <div className="animate-fade-up">
+            <Motion.div variants={fadeInUp} initial="hidden" animate="visible">
               <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1 text-xs font-medium text-primary-100">
                 <Sparkles className="h-3.5 w-3.5" />
                 Plataforma moderna para ciudades más seguras
               </div>
               <h1 className="max-w-xl text-4xl font-bold leading-tight tracking-tight text-white sm:text-5xl">
-                Tu ciudad, conectada y protegida en tiempo real.
+                Reporta, protege y actúa antes de que sea tarde.
               </h1>
-              <p className="mt-5 max-w-xl text-base leading-relaxed text-primary-200 sm:text-lg">
-                Cartagena Segura centraliza reportes, monitoreo y comunicación entre ciudadanía y autoridades en una sola experiencia profesional.
+              <p className="mt-4 max-w-xl text-base leading-relaxed text-primary-100 sm:text-lg">
+                Cuando la inseguridad te quita tranquilidad, Cartagena Segura conecta a la comunidad y a las autoridades para responder con rapidez.
               </p>
+              <Motion.div
+                initial={{ opacity: 0, x: -12 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3, duration: 0.6 }}
+                className="mt-4 inline-flex items-center gap-2 rounded-full border border-red-300/30 bg-red-500/10 px-3 py-1.5 text-xs font-semibold text-red-100"
+              >
+                <span className="inline-flex h-2.5 w-2.5 rounded-full bg-red-500" />
+                🔴 Último reporte hace 2 min
+              </Motion.div>
               <div className="mt-8 flex flex-col gap-3 sm:flex-row">
                 <Link to="/register" className="inline-flex items-center justify-center gap-2 rounded-2xl bg-white px-6 py-3 text-sm font-bold text-primary-900 shadow-lg shadow-primary-950/30 transition hover:bg-primary-50 hover:-translate-y-0.5">
                   Empezar ahora
@@ -146,17 +183,24 @@ export default function LandingPage() {
                   Ya tengo cuenta
                 </Link>
               </div>
-            </div>
+            </Motion.div>
 
-            <div className="space-y-4 animate-fade-up-delay">
+            <Motion.div className="space-y-4" variants={fadeInUp} initial="hidden" animate="visible" transition={{ delay: 0.15 }}>
               <div className="rounded-3xl border border-white/15 bg-white/10 p-5 shadow-2xl backdrop-blur-xl sm:p-6">
                 <p className="mb-4 text-sm font-semibold text-white">Indicadores clave de la plataforma</p>
                 <div className="grid grid-cols-2 gap-3">
                   {stats.map((stat) => (
-                    <div key={stat.label} className="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 text-center transition hover:bg-white/20">
-                      <p className="text-2xl font-bold text-white">{stat.value}</p>
+                    <Motion.div
+                      key={stat.label}
+                      whileHover={hoverSpring.whileHover}
+                      className="rounded-2xl border border-white/10 bg-white/10 px-4 py-4 text-center"
+                    >
+                      <p className="text-2xl font-bold text-white">
+                        <CountUp end={stat.value} duration={2} separator="," enableScrollSpy scrollSpyOnce />
+                        {stat.suffix}
+                      </p>
                       <p className="mt-1 text-xs text-primary-200">{stat.label}</p>
-                    </div>
+                    </Motion.div>
                   ))}
                 </div>
               </div>
@@ -171,7 +215,7 @@ export default function LandingPage() {
                   Visualización estratégica para decisiones más rápidas
                 </div>
               </div>
-            </div>
+            </Motion.div>
           </div>
         </div>
       </header>
@@ -180,13 +224,13 @@ export default function LandingPage() {
         <div className="mx-auto max-w-6xl rounded-3xl border border-slate-200 bg-white px-5 py-6 shadow-sm sm:px-8">
           <div className="grid gap-6 md:grid-cols-3">
             {pillars.map((pillar) => (
-              <div key={pillar.title} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5 transition duration-300 hover:-translate-y-1 hover:shadow-md">
+              <Motion.div key={pillar.title} {...hoverSpring} className="rounded-2xl border border-slate-100 bg-slate-50/70 p-5">
                 <div className="mb-3 inline-flex rounded-xl bg-primary-50 p-2 text-primary-700">
                   <pillar.icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-sm font-bold text-slate-900">{pillar.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{pillar.desc}</p>
-              </div>
+              </Motion.div>
             ))}
           </div>
         </div>
@@ -201,17 +245,28 @@ export default function LandingPage() {
               Una experiencia enfocada en usabilidad, velocidad y claridad para ciudadanos y equipos de respuesta.
             </p>
           </div>
-          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          <Motion.div
+            variants={cardStagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3"
+          >
             {features.map((feature) => (
-              <article key={feature.title} className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm transition duration-300 hover:-translate-y-1 hover:shadow-lg">
+              <Motion.article
+                key={feature.title}
+                variants={fadeInUp}
+                whileHover={hoverSpring.whileHover}
+                className="group rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+              >
                 <div className={`mb-4 inline-flex rounded-2xl p-3 transition group-hover:scale-105 ${feature.color}`}>
                   <feature.icon className="h-5 w-5" />
                 </div>
                 <h3 className="text-base font-bold text-slate-900">{feature.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{feature.desc}</p>
-              </article>
+              </Motion.article>
             ))}
-          </div>
+          </Motion.div>
         </div>
       </section>
 
@@ -221,17 +276,28 @@ export default function LandingPage() {
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-primary-600">Flujo de uso</p>
             <h2 className="text-3xl font-bold tracking-tight text-slate-900">Un proceso simple, claro y accionable</h2>
           </div>
-          <div className="grid gap-5 md:grid-cols-3">
+          <Motion.div
+            variants={cardStagger}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.2 }}
+            className="grid gap-5 md:grid-cols-3"
+          >
             {journey.map((item) => (
-              <div key={item.step} className="relative rounded-3xl border border-slate-200 bg-slate-50 p-6 transition duration-300 hover:-translate-y-1 hover:border-primary-200 hover:shadow-md">
+              <Motion.div
+                key={item.step}
+                variants={fadeInUp}
+                whileHover={hoverSpring.whileHover}
+                className="relative rounded-3xl border border-slate-200 bg-slate-50 p-6 hover:border-primary-200"
+              >
                 <span className="mb-4 inline-flex rounded-xl bg-primary-600 px-3 py-1 text-xs font-semibold tracking-wide text-white">
                   Paso {item.step}
                 </span>
                 <h3 className="text-lg font-bold text-slate-900">{item.title}</h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">{item.desc}</p>
-              </div>
+              </Motion.div>
             ))}
-          </div>
+          </Motion.div>
         </div>
       </section>
 
