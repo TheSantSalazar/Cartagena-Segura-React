@@ -93,3 +93,46 @@
     animation: none;
   }
 }
+
+@keyframes markerScaleIn {
+  0% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes markerPulse {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.7;
+  }
+  100% {
+    transform: scale(1.9);
+    opacity: 0;
+  }
+}
+
+.leaflet-marker-icon {
+  animation: markerScaleIn 0.45s ease-out both;
+}
+
+.marker-pin-wrap {
+  position: relative;
+}
+
+.marker-ping {
+  position: absolute;
+  z-index: 1;
+  left: 50%;
+  top: 50%;
+  width: 100%;
+  height: 100%;
+  border-radius: 9999px;
+  background: rgba(239, 68, 68, 0.35);
+  transform: translate(-50%, -50%);
+  animation: markerPulse 1.4s ease-out infinite;
+}
