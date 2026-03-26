@@ -2,8 +2,8 @@ import axios from 'axios'
 import toast from 'react-hot-toast'
 
 const api = axios.create({
-  baseURL: 'https://cartagena-segura.up.railway.app/api',
-          //'http://localhost:8080/api',
+  baseURL: //'https://cartagena-segura.up.railway.app/api',
+          'http://localhost:8080/api',
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })
@@ -21,6 +21,10 @@ api.interceptors.response.use(
   err => {
     const status = err.response?.status
     const msg    = err.response?.data?.message || 'Error inesperado'
+    const url    = err.config?.url || ''
+
+    // Rutas de auth — dejar que cada página maneje sus propios errores
+    if (url.includes('/auth/')) return Promise.reject(err)
 
     if (status === 401) {
       localStorage.removeItem('token')

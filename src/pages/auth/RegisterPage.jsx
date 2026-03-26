@@ -16,7 +16,23 @@ export default function RegisterPage() {
       await authService.register(data)
       toast.success('¡Cuenta creada! Ya puedes iniciar sesión')
       navigate('/login')
-    } catch {} finally { setLoading(false) }
+    } catch (err) {
+  const status = err?.response?.status
+  const message = err?.response?.data?.message
+  if (status === 400 && message?.includes('username')) {
+    toast.error('El nombre de usuario ya está en uso.')
+  } else if (status === 400 && message?.includes('email')) {
+    toast.error('El correo electrónico ya está registrado.')
+  } else if (status === 400 && message?.includes('teléfono')) {
+    toast.error('El teléfono ya está registrado.')
+  } else if (status === 403 || status === 401) {
+    toast.error('No autorizado. Intenta de nuevo.')
+  } else if (status === 500) {
+    toast.error('Error del servidor. Intenta más tarde.')
+  } else {
+    toast.error('Error al crear la cuenta. Intenta de nuevo.')
+  }
+} finally { setLoading(false) }
   }
 
   return (

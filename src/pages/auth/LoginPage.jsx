@@ -21,7 +21,16 @@ export default function LoginPage() {
       login({ username, roles, fullName, email, phone }, token)
       toast.success(`¡Bienvenido, ${username}!`)
       navigate(roles?.includes('ROLE_ADMIN') ? '/admin' : '/app')
-    } catch {} finally { setLoading(false) }
+    } catch (err) {
+  const status = err?.response?.status
+  if (status === 401 || status === 403) {
+    toast.error('Credenciales incorrectas. Verifica tu usuario y contraseña.')
+  } else if (status === 500) {
+    toast.error('Error del servidor. Intenta más tarde.')
+  } else {
+    toast.error('Error al iniciar sesión. Intenta de nuevo.')
+  }
+} finally { setLoading(false) }
   }
 
   return (
