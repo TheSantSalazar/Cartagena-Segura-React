@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, AlertTriangle, Map, FileText, Phone, LogOut, Menu, X, BarChart2 } from 'lucide-react'
+import { LayoutDashboard, AlertTriangle, Map, FileText, Phone, LogOut, Menu, X, BarChart2, Brain } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 
 const navItems = [
@@ -9,7 +9,8 @@ const navItems = [
   { to: '/admin/zones',     icon: Map,             label: 'Zonas'       },
   { to: '/admin/emergency', icon: Phone,           label: 'Emergencias' },
   { to: '/admin/logs',      icon: FileText,        label: 'Logs'        },
-  { to: '/admin/reports',    icon: BarChart2,       label: 'Reportes'    },
+  { to: '/admin/reports',   icon: BarChart2,       label: 'Reportes'    },
+  { to: '/admin/ai',        icon: Brain,           label: 'Asistente IA', badge: 'BETA' },
 ]
 
 export default function AdminLayout() {
@@ -38,7 +39,7 @@ export default function AdminLayout() {
 
       {/* Nav */}
       <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map(({ to, icon: Icon, label, end }) => (
+        {navItems.map(({ to, icon: Icon, label, end, badge }) => (
           <NavLink key={to} to={to} end={end}
             onClick={() => setSidebarOpen(false)}
             className={({ isActive }) =>
@@ -47,6 +48,11 @@ export default function AdminLayout() {
             }>
             <Icon className="w-4 h-4" />
             {label}
+            {badge && (
+              <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-primary-400/30 text-primary-200 animate-pulse">
+                {badge}
+              </span>
+            )}
           </NavLink>
         ))}
       </nav>

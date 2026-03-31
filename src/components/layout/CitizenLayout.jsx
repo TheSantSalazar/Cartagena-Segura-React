@@ -2,6 +2,7 @@ import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
 import { Home, AlertTriangle, Map, Phone, LogOut, BarChart2 } from 'lucide-react'
 import useAuthStore from '@/store/authStore'
 import NotificationPanel from '@/components/NotificationPanel'
+import AIChatbot from '@/components/AIChatbot'
 
 const navItems = [
   { to: '/app',           icon: Home,          label: 'Inicio',      end: true },
@@ -47,6 +48,9 @@ export default function CitizenLayout() {
       <main className="flex-1 overflow-auto pb-20">
         <Outlet />
       </main>
+
+      {/* AI Chatbot FAB */}
+      <AIChatbot />
 
       {/* BOTTOM NAV */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 shadow-lg">

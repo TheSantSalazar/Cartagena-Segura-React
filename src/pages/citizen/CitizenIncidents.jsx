@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
-import { incidentService } from '@/services/services'
-import { AlertTriangle, Plus, X, Loader2, MapPin, Navigation } from 'lucide-react'
+import { useEffect, useState, useRef, useCallback } from 'react'
+import { incidentService, aiService } from '@/services/services'
+import { AlertTriangle, Plus, X, Loader2, MapPin, Navigation, Sparkles, Check } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const priorityColor = { LOW: 'badge-low', MEDIUM: 'badge-medium', HIGH: 'badge-high', CRITICAL: 'badge-critical' }
@@ -17,6 +17,12 @@ export default function CitizenIncidents() {
   const [saving, setSaving]       = useState(false)
   const [gpsLoading, setGpsLoading] = useState(false)
 
+  // AI classification state
+  const [classifying, setClassifying] = useState(false)
+  const [suggestion, setSuggestion]   = useState(null)
+  const [suggestionApplied, setSuggestionApplied] = useState(false)
+  const debounceRef = useRef(null)
+
   const load = () => {
     setLoading(true)
     incidentService.getMine()
@@ -26,6 +32,51 @@ export default function CitizenIncidents() {
   }
 
   useEffect(() => { load() }, [])
+
+  // AI auto-classify with debounce
+  const classifyDescription = useCallback(async (desc) => {
+    if (desc.length < 30) {
+      setSuggestion(null)
+      return
+    }
+    setClassifying(true)
+    setSuggestionApplied(false)
+    try {
+      const res = await aiService.classify({ description: desc })
+      const data = res.data
+      if (data?.type || data?.priority) {
+        setSuggestion({
+          type: data.type ?? null,
+          priority: data.priority ?? null,
+          confidence: data.confidence ?? null,
+        })
+      }
+    } catch {
+      setSuggestion(null)
+    } finally {
+      setClassifying(false)
+    }
+  }, [])
+
+  const handleDescriptionChange = (e) => {
+    const val = e.target.value
+    setForm(f => ({ ...f, description: val }))
+    setSuggestionApplied(false)
+
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => classifyDescription(val), 1200)
+  }
+
+  const applySuggestion = () => {
+    if (!suggestion) return
+    setForm(f => ({
+      ...f,
+      type: suggestion.type ?? f.type,
+      priority: suggestion.priority ?? f.priority,
+    }))
+    setSuggestionApplied(true)
+    toast.success('Sugerencia de IA aplicada')
+  }
 
   const detectGPS = () => {
     if (!navigator.geolocation) {
@@ -41,7 +92,7 @@ export default function CitizenIncidents() {
         toast.success('Ubicación GPS detectada')
         setGpsLoading(false)
       },
-      (err) => {
+      () => {
         toast.error('No se pudo obtener la ubicación GPS')
         setGpsLoading(false)
       },
@@ -61,6 +112,7 @@ export default function CitizenIncidents() {
       toast.success('Incidente reportado correctamente')
       setShowForm(false)
       setForm(emptyForm)
+      setSuggestion(null)
       load()
     } catch {
       toast.error('Error al reportar el incidente')
@@ -83,7 +135,7 @@ export default function CitizenIncidents() {
           <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 max-h-[90vh] overflow-y-auto">
             <div className="flex items-center justify-between mb-5">
               <h2 className="text-lg font-bold text-gray-900">Nuevo Reporte</h2>
-              <button onClick={() => setShowForm(false)} className="text-gray-400 hover:text-gray-600">
+              <button onClick={() => { setShowForm(false); setSuggestion(null) }} className="text-gray-400 hover:text-gray-600">
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -101,8 +153,52 @@ export default function CitizenIncidents() {
               <div>
                 <label className="label">Descripción</label>
                 <textarea className="input" rows={3} required value={form.description}
-                  onChange={e => setForm({...form, description: e.target.value})}
-                  placeholder="Describe lo que ocurrió..." />
+                  onChange={handleDescriptionChange}
+                  placeholder="Describe lo que ocurrió... (la IA analizará tu descripción)" />
+
+                {/* AI Classification Badge */}
+                {classifying && (
+                  <div className="mt-2 flex items-center gap-2 px-3 py-2 bg-primary-50 rounded-xl border border-primary-100 animate-chat-slide-in">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-primary-500" />
+                    <span className="text-xs text-primary-600 font-medium">IA analizando descripción...</span>
+                  </div>
+                )}
+
+                {suggestion && !classifying && (
+                  <div className="mt-2 px-3 py-2.5 bg-gradient-to-r from-violet-50 to-purple-50 rounded-xl border border-purple-200 animate-chat-slide-in">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <Sparkles className="w-3.5 h-3.5 text-purple-500" />
+                      <span className="text-xs font-bold text-purple-700">IA sugiere:</span>
+                    </div>
+                    <div className="flex flex-wrap items-center gap-2">
+                      {suggestion.type && (
+                        <span className="text-xs font-semibold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+                          {suggestion.type}
+                        </span>
+                      )}
+                      {suggestion.priority && (
+                        <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${priorityColor[suggestion.priority] || 'bg-gray-100 text-gray-600'}`}>
+                          {suggestion.priority}
+                        </span>
+                      )}
+                      {suggestion.confidence && (
+                        <span className="text-[10px] text-purple-500 font-medium">
+                          ({Math.round(suggestion.confidence * 100)}% confianza)
+                        </span>
+                      )}
+                    </div>
+                    {!suggestionApplied ? (
+                      <button type="button" onClick={applySuggestion}
+                        className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-purple-600 hover:text-purple-700 transition-colors">
+                        <Check className="w-3 h-3" /> Aplicar sugerencia
+                      </button>
+                    ) : (
+                      <p className="mt-2 text-[10px] text-green-600 font-medium flex items-center gap-1">
+                        <Check className="w-3 h-3" /> Sugerencia aplicada
+                      </p>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -121,7 +217,6 @@ export default function CitizenIncidents() {
                   <MapPin className="w-4 h-4 text-primary-500" /> Ubicación del incidente
                 </p>
 
-                {/* GPS Button */}
                 <button type="button" onClick={detectGPS} disabled={gpsLoading}
                   className="w-full flex items-center justify-center gap-2 px-4 py-2.5 bg-primary-600 hover:bg-primary-700 disabled:opacity-60 text-white text-sm font-semibold rounded-xl transition-colors">
                   {gpsLoading
@@ -130,7 +225,6 @@ export default function CitizenIncidents() {
                   }
                 </button>
 
-                {/* GPS result */}
                 {form.latitude && form.longitude && (
                   <div className="flex items-center gap-2 bg-green-50 border border-green-100 rounded-xl px-3 py-2">
                     <MapPin className="w-4 h-4 text-green-600 flex-shrink-0" />
@@ -150,12 +244,10 @@ export default function CitizenIncidents() {
                   <div className="flex-1 h-px bg-gray-200" />
                 </div>
 
-                {/* Manual address */}
                 <input className="input" value={form.location}
                   onChange={e => setForm({...form, location: e.target.value})}
                   placeholder="Ej: Carrera 3 con Calle 10, Getsemaní" />
 
-                {/* Manual coords */}
                 <div className="grid grid-cols-2 gap-2">
                   <div>
                     <label className="label text-xs">Latitud manual</label>
@@ -173,7 +265,7 @@ export default function CitizenIncidents() {
               </div>
 
               <div className="flex gap-3 pt-2">
-                <button type="button" onClick={() => setShowForm(false)}
+                <button type="button" onClick={() => { setShowForm(false); setSuggestion(null) }}
                   className="flex-1 px-4 py-2 border border-gray-200 rounded-xl text-gray-600 text-sm font-medium hover:bg-gray-50">
                   Cancelar
                 </button>

@@ -12,6 +12,7 @@ import AdminZones     from '@/pages/admin/AdminZones'
 import AdminLogs      from '@/pages/admin/AdminLogs'
 import AdminEmergency from '@/pages/admin/AdminEmergency'
 import AdminReports   from '@/pages/admin/AdminReports'
+import AdminAI        from '@/pages/admin/AdminAI'
 
 import CitizenLayout    from '@/components/layout/CitizenLayout'
 import CitizenHome      from '@/pages/citizen/CitizenHome'
@@ -56,6 +57,7 @@ export default function App() {
         <Route path="logs"        element={<AdminLogs />} />
         <Route path="emergency"   element={<AdminEmergency />} />
         <Route path="reports"     element={<AdminReports />} />
+        <Route path="ai"          element={<AdminAI />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />

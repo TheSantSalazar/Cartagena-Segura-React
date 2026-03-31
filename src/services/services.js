@@ -58,3 +58,11 @@ export const reportService = {
   getAll:   (params) => api.get('/reports', { params }),
   generate: (data)   => api.post('/reports', data),
 }
+
+// ── AI (Spring AI) ────────────────────────────────────────────────────────
+export const aiService = {
+  chat:          (data) => api.post('/ai/chat', data),
+  classify:      (data) => api.post('/ai/classify', data),
+  summary:       ()     => api.get('/ai/summary'),
+  zonesAnalysis: ()     => api.get('/ai/zones/analysis'),
+}

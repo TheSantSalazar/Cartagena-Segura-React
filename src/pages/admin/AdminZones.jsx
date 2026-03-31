@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { zoneService } from '@/services/services'
-import { MapPin, Plus, X, Loader2, Shield, AlertTriangle } from 'lucide-react'
+import { zoneService, aiService } from '@/services/services'
+import { MapPin, Plus, X, Loader2, Shield, AlertTriangle, Brain, Sparkles, RefreshCw } from 'lucide-react'
 import toast from 'react-hot-toast'
 
 const riskColors = { LOW: 'bg-green-100 text-green-700', MEDIUM: 'bg-yellow-100 text-yellow-700', HIGH: 'bg-orange-100 text-orange-700', CRITICAL: 'bg-red-100 text-red-700' }
@@ -12,6 +12,28 @@ export default function AdminZones() {
   const [showForm, setShowForm] = useState(false)
   const [form, setForm]         = useState(emptyForm)
   const [saving, setSaving]     = useState(false)
+
+  // AI analysis state
+  const [aiZones, setAiZones]         = useState([])
+  const [aiLoading, setAiLoading]     = useState(false)
+  const [aiError, setAiError]         = useState(false)
+  const [showAiPanel, setShowAiPanel] = useState(false)
+
+  const analyzeWithAI = async () => {
+    setAiLoading(true)
+    setAiError(false)
+    setShowAiPanel(true)
+    try {
+      const res = await aiService.zonesAnalysis()
+      const data = res.data?.zones ?? res.data?.data ?? res.data ?? []
+      setAiZones(Array.isArray(data) ? data : [])
+    } catch {
+      setAiError(true)
+      setAiZones([])
+    } finally {
+      setAiLoading(false)
+    }
+  }
 
   const load = () => {
     setLoading(true)
@@ -44,10 +66,76 @@ export default function AdminZones() {
           <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Gestión de Zonas</h1>
           <p className="text-sm text-gray-500 mt-0.5">Zonas de seguridad de Cartagena</p>
         </div>
-        <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2 text-sm">
-          <Plus className="w-4 h-4" /><span className="hidden sm:inline">Nueva Zona</span><span className="sm:hidden">Nueva</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={analyzeWithAI} disabled={aiLoading}
+            className="flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-violet-500 to-purple-600 hover:from-violet-600 hover:to-purple-700 disabled:opacity-50 text-white text-xs sm:text-sm font-medium rounded-xl transition-all shadow-sm">
+            {aiLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Brain className="w-3.5 h-3.5" />}
+            <span className="hidden sm:inline">Analizar con IA</span><span className="sm:hidden">IA</span>
+          </button>
+          <button onClick={() => setShowForm(true)} className="btn-primary flex items-center gap-2 text-sm">
+            <Plus className="w-4 h-4" /><span className="hidden sm:inline">Nueva Zona</span><span className="sm:hidden">Nueva</span>
+          </button>
+        </div>
       </div>
+
+      {/* AI Analysis Panel */}
+      {showAiPanel && (
+        <div className="card overflow-hidden border-purple-100 animate-slide-up-stagger">
+          <div className="px-4 sm:px-5 py-3 border-b border-purple-100 bg-gradient-to-r from-violet-50/80 to-purple-50/80 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Sparkles className="w-4 h-4 text-purple-500" />
+              <h3 className="font-semibold text-gray-900 text-sm">Análisis de Riesgo por IA</h3>
+            </div>
+            <button onClick={() => setShowAiPanel(false)} className="text-gray-400 hover:text-gray-600">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="p-4">
+            {aiLoading && (
+              <div className="flex items-center gap-3 py-6 justify-center">
+                <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
+                <span className="text-sm text-gray-500">Analizando patrones de incidentes...</span>
+              </div>
+            )}
+            {aiError && (
+              <div className="bg-red-50 rounded-xl p-3 text-center">
+                <p className="text-red-600 text-xs font-medium">Servicio de IA no disponible</p>
+                <button onClick={analyzeWithAI} className="mt-2 text-xs text-red-500 flex items-center gap-1 mx-auto">
+                  <RefreshCw className="w-3 h-3" /> Reintentar
+                </button>
+              </div>
+            )}
+            {aiZones.length > 0 && !aiLoading && (
+              <div className="space-y-2">
+                {aiZones.map((z, i) => {
+                  const existing = zones.find(zone => zone.name?.toLowerCase() === z.name?.toLowerCase())
+                  const differs = existing && existing.riskLevel !== z.riskLevel
+                  return (
+                    <div key={z.name || i} className="flex items-start gap-3 p-3 rounded-xl bg-gray-50 border border-gray-100 animate-slide-up-stagger" style={{ animationDelay: `${i * 60}ms` }}>
+                      <Brain className="w-4 h-4 text-purple-500 mt-0.5 flex-shrink-0" />
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <span className="text-sm font-semibold text-gray-900">{z.name}</span>
+                          <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full text-white
+                            ${z.riskLevel === 'CRITICAL' ? 'bg-red-500' : z.riskLevel === 'HIGH' ? 'bg-orange-500' : z.riskLevel === 'MEDIUM' ? 'bg-yellow-500' : 'bg-green-500'}`}>
+                            {z.riskLevel}
+                          </span>
+                          {differs && (
+                            <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                              ⚠️ Difiere del actual ({existing.riskLevel})
+                            </span>
+                          )}
+                        </div>
+                        {z.recommendation && <p className="text-xs text-gray-500 mt-1 leading-relaxed">{z.recommendation}</p>}
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {showForm && (
         <div className="fixed inset-0 bg-black/50 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">

@@ -163,7 +163,7 @@ export default function LandingPage() {
 
               <div className="relative overflow-hidden rounded-3xl border border-white/15 bg-white/10 p-3 backdrop-blur-xl">
                 <img
-                  src="/hero-monitoring.svg"
+                  src="/hero-monitoring.png"
                   alt="Centro urbano vigilado con tecnología de monitoreo"
                   className="h-48 w-full rounded-2xl object-cover"
                 />
