@@ -26,7 +26,7 @@ const emptyForm = { type: 'ROBO', description: '', location: '', latitude: '', l
 const MAX_FILES = 5
 const MAX_SIZE_MB = 10
 
-/* ── File Preview ─────────────────────────────────────────────────────── */
+/* ── FilePreview ──────────────────────────────────────────────────────── */
 function FilePreview({ file, onRemove }) {
   const [preview, setPreview] = useState(null)
   const isImage = file.type.startsWith('image/')
@@ -66,11 +66,106 @@ function FilePreview({ file, onRemove }) {
   )
 }
 
+/* ── IncidentDetailModal (ciudadano) ──────────────────────────────────── */
+function IncidentDetailModal({ inc, onClose }) {
+  const isImage = (url) => /\.(jpg|jpeg|png|webp|gif)(\?|$)/i.test(url)
+  const st = STATUS_MAP[inc.status] ?? STATUS_MAP.PENDING
+  const pr = PRIORITY_COLOR[inc.priority] ?? PRIORITY_COLOR.MEDIUM
+  const StIcon = st.icon
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1100, backdropFilter: 'blur(4px)' }}
+      onClick={e => e.target === e.currentTarget && onClose()}
+    >
+      <div className="modal-inner" style={{ background: '#fff', borderRadius: '24px 24px 0 0', width: '100%', maxWidth: 520, maxHeight: '90vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 -20px 60px rgba(0,0,0,0.3)' }}>
+
+        {/* Header */}
+        <div style={{ padding: '20px 20px 16px', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <div style={{ width: 44, height: 44, borderRadius: 16, background: st.bg, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <StIcon size={20} style={{ color: st.color }} />
+            </div>
+            <div>
+              <p style={{ fontSize: 17, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.01em' }}>{inc.type}</p>
+              <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 1 }}>
+                {inc.createdAt ? new Date(inc.createdAt).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'Fecha desconocida'}
+              </p>
+            </div>
+          </div>
+          <button onClick={onClose} style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid #E2E8F0', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <X size={15} style={{ color: '#64748B' }} />
+          </button>
+        </div>
+
+        <div style={{ flex: 1, overflowY: 'auto', padding: '18px 20px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+
+          {/* Badges estado + prioridad */}
+          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <span style={{ fontSize: 12, fontWeight: 700, padding: '5px 14px', borderRadius: 10, background: st.bg, color: st.color }}>{st.label}</span>
+            <span style={{ fontSize: 12, fontWeight: 700, padding: '5px 14px', borderRadius: 10, background: pr.bg, color: pr.color }}>Prioridad {pr.label}</span>
+          </div>
+
+          {/* Descripción */}
+          <div style={{ background: '#F8FAFC', borderRadius: 16, padding: 16 }}>
+            <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 8 }}>Descripción</p>
+            <p style={{ fontSize: 14, color: '#334155', lineHeight: 1.65 }}>{inc.description || 'Sin descripción'}</p>
+          </div>
+
+          {/* Ubicación */}
+          {(inc.location || inc.latitude) && (
+            <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10, padding: '12px 14px', borderRadius: 14, background: 'rgba(59,130,246,0.05)', border: '1px solid rgba(59,130,246,0.12)' }}>
+              <MapPin size={16} style={{ color: '#3B82F6', flexShrink: 0, marginTop: 2 }} />
+              <div>
+                {inc.location && <p style={{ fontSize: 13, color: '#1E40AF', fontWeight: 600 }}>{inc.location}</p>}
+                {inc.latitude && <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 3 }}>📍 {inc.latitude}, {inc.longitude}</p>}
+              </div>
+            </div>
+          )}
+
+          {/* Fotos / Archivos */}
+          {inc.imageUrls?.length > 0 ? (
+            <div>
+              <p style={{ fontSize: 11, fontWeight: 700, color: '#94A3B8', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 10 }}>
+                Evidencia adjunta ({inc.imageUrls.length})
+              </p>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 8 }}>
+                {inc.imageUrls.map((url, i) => (
+                  isImage(url) ? (
+                    <a key={i} href={url} target="_blank" rel="noreferrer"
+                      style={{ borderRadius: 14, overflow: 'hidden', display: 'block', aspectRatio: '1', background: '#F1F5F9', cursor: 'zoom-in' }}>
+                      <img src={url} alt={`evidencia-${i + 1}`} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                    </a>
+                  ) : (
+                    <a key={i} href={url} target="_blank" rel="noreferrer"
+                      style={{ borderRadius: 14, border: '1px solid #E2E8F0', padding: '10px 8px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 6, background: '#F8FAFC', textDecoration: 'none', aspectRatio: '1' }}>
+                      <FileText size={22} style={{ color: '#94A3B8' }} />
+                      <span style={{ fontSize: 9, color: '#64748B', fontWeight: 600, textAlign: 'center', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', width: '90%' }}>
+                        {url.split('/').pop()}
+                      </span>
+                    </a>
+                  )
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div style={{ padding: 16, textAlign: 'center', borderRadius: 14, background: '#F8FAFC', border: '1px solid #F1F5F9' }}>
+              <Image size={22} style={{ color: '#CBD5E1', display: 'block', margin: '0 auto 8px' }} />
+              <p style={{ fontSize: 12, color: '#CBD5E1' }}>Sin archivos adjuntos</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── Main Component ───────────────────────────────────────────────────── */
 export default function CitizenIncidents() {
   const [incidents, setIncidents]       = useState([])
   const [loading, setLoading]           = useState(true)
   const [showForm, setShowForm]         = useState(false)
+  const [viewingInc, setViewingInc]     = useState(null)
   const [form, setForm]                 = useState(emptyForm)
   const [saving, setSaving]             = useState(false)
   const [gpsLoading, setGpsLoading]     = useState(false)
@@ -81,10 +176,10 @@ export default function CitizenIncidents() {
   const [classifying, setClassifying]   = useState(false)
   const [suggestion, setSuggestion]     = useState(null)
   const [suggApplied, setSuggApplied]   = useState(false)
-  const [activeTab, setActiveTab]       = useState('form') // 'form' | 'files'
-  const debounceRef = useRef(null)
+  const [activeTab, setActiveTab]       = useState('form')
+  const debounceRef  = useRef(null)
   const fileInputRef = useRef(null)
-  const dropRef = useRef(null)
+  const dropRef      = useRef(null)
 
   const load = () => {
     setLoading(true)
@@ -102,7 +197,8 @@ export default function CitizenIncidents() {
     try {
       const res = await aiService.classify({ description: desc })
       const data = res.data
-      if (data?.type || data?.priority) setSuggestion({ type: data.type ?? null, priority: data.priority ?? null, confidence: data.confidence ?? null })
+      if (data?.type || data?.priority)
+        setSuggestion({ type: data.type ?? null, priority: data.priority ?? null, confidence: data.confidence ?? null })
     } catch { setSuggestion(null) }
     finally { setClassifying(false) }
   }, [])
@@ -161,50 +257,57 @@ export default function CitizenIncidents() {
     e.preventDefault()
     setSaving(true)
     try {
-      const formData = new FormData()
-      formData.append('type', form.type)
-      formData.append('description', form.description)
-      formData.append('location', form.location)
-      formData.append('priority', form.priority)
-      if (form.latitude)  formData.append('latitude',  form.latitude)
-      if (form.longitude) formData.append('longitude', form.longitude)
-      files.forEach(f => formData.append('files', f))
+      // 1. Subir archivos primero si hay
+      let imageUrls = []
+      if (files.length > 0) {
+        const uploadRes = await incidentService.uploadFiles(files)
+        imageUrls = uploadRes.data?.data?.urls ?? uploadRes.data?.urls ?? []
+      }
 
+      // 2. Crear el incidente con las URLs ya resueltas
       await incidentService.create({
         ...form,
         latitude:  form.latitude  ? parseFloat(form.latitude)  : null,
         longitude: form.longitude ? parseFloat(form.longitude) : null,
+        imageUrls,
       })
+
       toast.success('✅ Incidente reportado correctamente')
-      setShowForm(false); setForm(emptyForm); setFiles([]); setSuggestion(null)
+      setShowForm(false); setForm(emptyForm); setFiles([]); setSuggestion(null); setActiveTab('form')
       load()
-    } catch { toast.error('Error al reportar el incidente') }
-    finally { setSaving(false) }
+    } catch {
+      toast.error('Error al reportar el incidente')
+    } finally {
+      setSaving(false)
+    }
   }
+
+  const closeForm = () => { setShowForm(false); setSuggestion(null); setFiles([]); setActiveTab('form') }
 
   /* ── Filtered list ── */
   const filtered = incidents.filter(inc => {
     const matchStatus = filterStatus === 'ALL' || inc.status === filterStatus
-    const matchSearch = !search || inc.type?.toLowerCase().includes(search.toLowerCase()) || inc.description?.toLowerCase().includes(search.toLowerCase())
+    const matchSearch = !search ||
+      inc.type?.toLowerCase().includes(search.toLowerCase()) ||
+      inc.description?.toLowerCase().includes(search.toLowerCase())
     return matchStatus && matchSearch
   })
-
-  const closeForm = () => { setShowForm(false); setSuggestion(null); setFiles([]); setActiveTab('form') }
 
   return (
     <div style={{ padding: '0 0 32px', fontFamily: "'DM Sans', system-ui, sans-serif", minHeight: '100%', background: '#F8FAFC' }}>
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
-        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
-        @keyframes modalIn { from{opacity:0;transform:scale(0.96) translateY(16px)}to{opacity:1;transform:scale(1) translateY(0)} }
-        @keyframes slideIn { from{opacity:0;transform:translateX(-8px)}to{opacity:1;transform:translateX(0)} }
-        .inc-fade { animation: fadeUp 400ms ease-out both; }
-        .s1{animation-delay:0ms} .s2{animation-delay:60ms} .s3{animation-delay:120ms}
+        @keyframes fadeUp   { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        @keyframes modalIn  { from{opacity:0;transform:scale(0.96) translateY(16px)} to{opacity:1;transform:scale(1) translateY(0)} }
+        @keyframes slideIn  { from{opacity:0;transform:translateX(-8px)} to{opacity:1;transform:translateX(0)} }
+        @keyframes spin     { to{transform:rotate(360deg)} }
+        .inc-fade  { animation: fadeUp 400ms ease-out both; }
+        .s1{animation-delay:0ms} .s2{animation-delay:60ms}
         .modal-inner { animation: modalIn 350ms cubic-bezier(0.16,1,0.3,1) both; }
-        .inc-row { transition: all 0.2s; border-bottom: 1px solid #F1F5F9; }
-        .inc-row:hover { background: #F8FAFC !important; }
+        .inc-row { transition: all 0.2s; border-bottom: 1px solid #F1F5F9; cursor: pointer; }
+        .inc-row:hover { background: #F0F7FF !important; }
         .inc-row:last-child { border-bottom: none; }
-        .tab-btn { transition: all 0.2s; cursor: pointer; border: none; background: none; }
+        .tab-btn   { transition: all 0.2s; cursor: pointer; border: none; background: none; }
         .filter-chip { transition: all 0.2s; cursor: pointer; border: none; }
         .drop-zone { transition: all 0.3s; }
         .drop-zone.active { border-color: #3B82F6 !important; background: rgba(59,130,246,0.04) !important; }
@@ -214,8 +317,7 @@ export default function CitizenIncidents() {
           appearance: none; width: 100%; padding: 10px 14px;
           background: #F8FAFC; border: 1px solid #E2E8F0;
           border-radius: 12px; font-size: 13px; color: #0F172A;
-          font-family: inherit; cursor: pointer; outline: none;
-          transition: all 0.2s;
+          font-family: inherit; cursor: pointer; outline: none; transition: all 0.2s;
         }
         select.input-sel:focus { border-color: #3B82F6; box-shadow: 0 0 0 3px rgba(59,130,246,0.12); }
         .text-input {
@@ -228,32 +330,30 @@ export default function CitizenIncidents() {
         .text-input::placeholder { color: #CBD5E1; }
       `}</style>
 
-      {/* ── Header ─────────────────────────────────────────────────────── */}
+      {/* ── Header ── */}
       <div style={{ padding: '20px 16px 0', display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: '#0F172A', letterSpacing: '-0.02em' }}>Mis Reportes</h1>
           <p style={{ fontSize: 12, color: '#94A3B8', marginTop: 2 }}>{incidents.length} incidente{incidents.length !== 1 ? 's' : ''} registrado{incidents.length !== 1 ? 's' : ''}</p>
         </div>
         <button onClick={() => setShowForm(true)}
-          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 12, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(29,78,216,0.3)', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '10px 18px', borderRadius: 12, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', boxShadow: '0 4px 16px rgba(29,78,216,0.3)', fontFamily: 'inherit' }}>
           <Plus size={14} /> Reportar
         </button>
       </div>
 
       <div style={{ padding: '0 16px', display: 'flex', flexDirection: 'column', gap: 14 }}>
 
-        {/* ── Search & Filter ─────────────────────────────────────────── */}
+        {/* ── Search & Filter ── */}
         <div className="inc-fade s1" style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
           <div style={{ position: 'relative' }}>
             <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#CBD5E1' }} />
             <input className="text-input" value={search} onChange={e => setSearch(e.target.value)}
-              placeholder="Buscar por tipo o descripción..."
-              style={{ paddingLeft: 36, borderRadius: 12 }} />
+              placeholder="Buscar por tipo o descripción..." style={{ paddingLeft: 36 }} />
           </div>
           <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 4 }}>
-            {[['ALL', 'Todos'], ['PENDING', 'Pendientes'], ['IN_PROGRESS', 'En progreso'], ['RESOLVED', 'Resueltos'], ['REJECTED', 'Rechazados']].map(([val, label]) => (
-              <button key={val} className="filter-chip"
-                onClick={() => setFilterStatus(val)}
+            {[['ALL','Todos'],['PENDING','Pendientes'],['IN_PROGRESS','En progreso'],['RESOLVED','Resueltos'],['REJECTED','Rechazados']].map(([val, label]) => (
+              <button key={val} className="filter-chip" onClick={() => setFilterStatus(val)}
                 style={{ padding: '6px 14px', borderRadius: 100, fontSize: 12, fontWeight: 600, whiteSpace: 'nowrap', background: filterStatus === val ? '#1D4ED8' : '#fff', color: filterStatus === val ? '#fff' : '#64748B', border: filterStatus === val ? '1px solid #1D4ED8' : '1px solid #E2E8F0', fontFamily: 'inherit' }}>
                 {label}
               </button>
@@ -261,7 +361,7 @@ export default function CitizenIncidents() {
           </div>
         </div>
 
-        {/* ── Incidents list ──────────────────────────────────────────── */}
+        {/* ── Lista de incidentes ── */}
         <div className="inc-fade s2">
           {loading ? (
             <div style={{ padding: 48, textAlign: 'center' }}>
@@ -287,12 +387,14 @@ export default function CitizenIncidents() {
             </div>
           ) : (
             <div style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', boxShadow: '0 1px 4px rgba(0,0,0,0.04)', overflow: 'hidden' }}>
-              {filtered.map((inc, i) => {
+              {filtered.map(inc => {
                 const st = STATUS_MAP[inc.status] ?? STATUS_MAP.PENDING
-                const pr = PRIORITY_COLOR[inc.priority] ?? PRIORITY_COLOR.LOW
+                const pr = PRIORITY_COLOR[inc.priority] ?? PRIORITY_COLOR.MEDIUM
                 const StIcon = st.icon
+                const hasPhotos = inc.imageUrls?.length > 0
                 return (
-                  <div key={inc.id} className="inc-row" style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: '#fff', cursor: 'default' }}>
+                  <div key={inc.id} className="inc-row" onClick={() => setViewingInc(inc)}
+                    style={{ display: 'flex', alignItems: 'center', gap: 14, padding: '14px 16px', background: '#fff' }}>
                     <div style={{ width: 42, height: 42, borderRadius: 14, background: st.bg, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                       <StIcon size={18} style={{ color: st.color }} />
                     </div>
@@ -300,6 +402,11 @@ export default function CitizenIncidents() {
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 3 }}>
                         <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>{inc.type}</p>
                         <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 6, color: pr.color, background: pr.bg, textTransform: 'uppercase', letterSpacing: '0.04em' }}>{pr.label}</span>
+                        {hasPhotos && (
+                          <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 7px', borderRadius: 6, color: '#3B82F6', background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', gap: 3 }}>
+                            <Image size={8} /> {inc.imageUrls.length}
+                          </span>
+                        )}
                       </div>
                       <p style={{ fontSize: 12, color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 200 }}>
                         {inc.description || inc.location || 'Sin descripción'}
@@ -311,8 +418,9 @@ export default function CitizenIncidents() {
                         </div>
                       )}
                     </div>
-                    <div style={{ textAlign: 'right', flexShrink: 0 }}>
+                    <div style={{ textAlign: 'right', flexShrink: 0, display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 4 }}>
                       <span style={{ fontSize: 11, color: st.color, fontWeight: 700 }}>{st.label}</span>
+                      <ArrowRight size={12} style={{ color: '#CBD5E1' }} />
                     </div>
                   </div>
                 )
@@ -322,9 +430,12 @@ export default function CitizenIncidents() {
         </div>
       </div>
 
-      {/* ── Modal ──────────────────────────────────────────────────────── */}
+      {/* ── Modal detalle ciudadano ── */}
+      {viewingInc && <IncidentDetailModal inc={viewingInc} onClose={() => setViewingInc(null)} />}
+
+      {/* ── Modal nuevo reporte ── */}
       {showForm && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)', padding: '0' }}
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', display: 'flex', alignItems: 'flex-end', justifyContent: 'center', zIndex: 1000, backdropFilter: 'blur(4px)' }}
           onClick={e => e.target === e.currentTarget && closeForm()}>
           <div className="modal-inner" style={{ background: '#fff', borderRadius: '24px 24px 0 0', width: '100%', maxWidth: 520, maxHeight: '94vh', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 -20px 60px rgba(0,0,0,0.3)' }}>
 
@@ -357,8 +468,6 @@ export default function CitizenIncidents() {
 
                 {activeTab === 'form' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-                    {/* Type & Priority row */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
                       <div>
                         <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Tipo</label>
@@ -377,14 +486,12 @@ export default function CitizenIncidents() {
                       </div>
                     </div>
 
-                    {/* Description */}
                     <div>
                       <label style={{ display: 'block', fontSize: 11, fontWeight: 700, color: '#64748B', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: 6 }}>Descripción *</label>
                       <textarea className="text-input" rows={4} required value={form.description}
                         onChange={handleDesc}
                         placeholder="Describe lo que ocurrió con el mayor detalle posible..." />
 
-                      {/* AI badge */}
                       {classifying && (
                         <div className="ai-badge" style={{ marginTop: 8, display: 'flex', alignItems: 'center', gap: 8, padding: '8px 12px', borderRadius: 10, background: 'rgba(59,130,246,0.06)', border: '1px solid rgba(59,130,246,0.15)' }}>
                           <Loader2 size={12} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
@@ -397,9 +504,7 @@ export default function CitizenIncidents() {
                           <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 8 }}>
                             <Sparkles size={12} style={{ color: '#8B5CF6' }} />
                             <span style={{ fontSize: 11, fontWeight: 700, color: '#6D28D9' }}>Sugerencia de IA</span>
-                            {suggestion.confidence && (
-                              <span style={{ fontSize: 10, color: '#8B5CF6', marginLeft: 'auto' }}>{Math.round(suggestion.confidence * 100)}% confianza</span>
-                            )}
+                            {suggestion.confidence && <span style={{ fontSize: 10, color: '#8B5CF6', marginLeft: 'auto' }}>{Math.round(suggestion.confidence * 100)}% confianza</span>}
                           </div>
                           <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 8 }}>
                             {suggestion.type && <span style={{ fontSize: 11, fontWeight: 700, padding: '3px 10px', borderRadius: 8, background: 'rgba(139,92,246,0.1)', color: '#7C3AED' }}>{suggestion.type}</span>}
@@ -419,15 +524,14 @@ export default function CitizenIncidents() {
                       )}
                     </div>
 
-                    {/* Location */}
+                    {/* Ubicación */}
                     <div style={{ borderRadius: 16, border: '1px solid #E2E8F0', padding: 14, background: '#F8FAFC' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                         <MapPin size={14} style={{ color: '#3B82F6' }} />
                         <span style={{ fontSize: 12, fontWeight: 700, color: '#0F172A' }}>Ubicación del incidente</span>
                       </div>
-
                       <button type="button" onClick={detectGPS} disabled={gpsLoading}
-                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', borderRadius: 12, background: gpsLoading ? '#E2E8F0' : 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: gpsLoading ? 'not-allowed' : 'pointer', marginBottom: 12, fontFamily: 'inherit', transition: 'all 0.2s' }}>
+                        style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', borderRadius: 12, background: gpsLoading ? '#E2E8F0' : 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: gpsLoading ? '#94A3B8' : '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: gpsLoading ? 'not-allowed' : 'pointer', marginBottom: 12, fontFamily: 'inherit', transition: 'all 0.2s' }}>
                         {gpsLoading ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Detectando GPS...</> : <><Navigation size={14} /> Usar mi ubicación GPS</>}
                       </button>
 
@@ -457,14 +561,13 @@ export default function CitizenIncidents() {
 
                 {activeTab === 'files' && (
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-                    {/* Drop zone */}
                     <div ref={dropRef}
                       className={`drop-zone ${dragOver ? 'active' : ''}`}
                       onDragOver={e => { e.preventDefault(); setDragOver(true) }}
                       onDragLeave={() => setDragOver(false)}
                       onDrop={handleDrop}
                       onClick={() => fileInputRef.current?.click()}
-                      style={{ border: `2px dashed ${dragOver ? '#3B82F6' : '#E2E8F0'}`, borderRadius: 16, padding: '32px 20px', textAlign: 'center', cursor: 'pointer', background: dragOver ? 'rgba(59,130,246,0.04)' : '#F8FAFC', transition: 'all 0.3s' }}>
+                      style={{ border: `2px dashed ${dragOver ? '#3B82F6' : '#E2E8F0'}`, borderRadius: 16, padding: '32px 20px', textAlign: 'center', cursor: 'pointer', background: dragOver ? 'rgba(59,130,246,0.04)' : '#F8FAFC' }}>
                       <input ref={fileInputRef} className="file-input" type="file" multiple
                         accept="image/*,.pdf,.doc,.docx,.txt"
                         onChange={e => addFiles(e.target.files)} />
@@ -474,15 +577,11 @@ export default function CitizenIncidents() {
                       <p style={{ fontSize: 14, fontWeight: 700, color: dragOver ? '#1D4ED8' : '#475569', marginBottom: 4 }}>
                         {dragOver ? 'Suelta aquí' : 'Arrastra archivos o haz clic'}
                       </p>
-                      <p style={{ fontSize: 12, color: '#94A3B8' }}>Imágenes, PDF, documentos · Máx. {MAX_SIZE_MB}MB por archivo · {MAX_FILES} archivos</p>
+                      <p style={{ fontSize: 12, color: '#94A3B8' }}>Imágenes, PDF, documentos · Máx. {MAX_SIZE_MB}MB · {MAX_FILES} archivos</p>
                     </div>
 
-                    {/* Quick action buttons */}
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
-                      {[
-                        [Camera, 'Tomar foto', 'image/*', '#3B82F6'],
-                        [FileText, 'Adjuntar doc', '.pdf,.doc,.docx', '#8B5CF6'],
-                      ].map(([Icon, label, accept, color]) => (
+                      {[[Camera, 'Tomar foto', 'image/*', '#3B82F6'], [FileText, 'Adjuntar doc', '.pdf,.doc,.docx', '#8B5CF6']].map(([Icon, label, accept, color]) => (
                         <button key={label} type="button"
                           onClick={() => {
                             const inp = document.createElement('input')
@@ -490,13 +589,12 @@ export default function CitizenIncidents() {
                             inp.onchange = e => addFiles(e.target.files)
                             inp.click()
                           }}
-                          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', borderRadius: 12, border: `1px solid ${color}25`, background: `${color}08`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, color, transition: 'all 0.2s' }}>
+                          style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '12px', borderRadius: 12, border: `1px solid ${color}25`, background: `${color}08`, cursor: 'pointer', fontFamily: 'inherit', fontSize: 13, fontWeight: 600, color }}>
                           <Icon size={14} /> {label}
                         </button>
                       ))}
                     </div>
 
-                    {/* File previews */}
                     {files.length > 0 && (
                       <div>
                         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 10 }}>
@@ -517,7 +615,7 @@ export default function CitizenIncidents() {
                     {files.length === 0 && (
                       <div style={{ padding: '20px', textAlign: 'center', borderRadius: 12, background: 'rgba(59,130,246,0.04)', border: '1px solid rgba(59,130,246,0.1)' }}>
                         <Image size={24} style={{ color: '#CBD5E1', display: 'block', margin: '0 auto 8px' }} />
-                        <p style={{ fontSize: 12, color: '#94A3B8' }}>Sin archivos adjuntos. Las imágenes y documentos ayudan a procesar el reporte más rápido.</p>
+                        <p style={{ fontSize: 12, color: '#94A3B8' }}>Sin archivos adjuntos. Las imágenes ayudan a procesar el reporte más rápido.</p>
                       </div>
                     )}
                   </div>
@@ -533,7 +631,10 @@ export default function CitizenIncidents() {
               </button>
               <button type="submit" form="incident-form" disabled={saving}
                 style={{ flex: 2, padding: '12px', borderRadius: 12, background: saving ? '#93C5FD' : 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', fontWeight: 700, fontSize: 14, border: 'none', cursor: saving ? 'not-allowed' : 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, boxShadow: '0 4px 16px rgba(29,78,216,0.25)', transition: 'all 0.2s' }}>
-                {saving ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> Enviando...</> : <><Zap size={14} /> Enviar Reporte</>}
+                {saving
+                  ? <><Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} /> {files.length > 0 ? 'Subiendo archivos...' : 'Enviando...'}</>
+                  : <><Zap size={14} /> Enviar Reporte {files.length > 0 ? `· ${files.length} archivo${files.length > 1 ? 's' : ''}` : ''}</>
+                }
               </button>
             </div>
           </div>

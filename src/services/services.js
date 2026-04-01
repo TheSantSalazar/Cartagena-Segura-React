@@ -18,6 +18,14 @@ export const incidentService = {
   getHistory:   (id)     => api.get(`/incidents/${id}/history`),
   getComments:  (id)     => api.get(`/incidents/${id}/comments`),
   addComment:   (id, d)  => api.post(`/incidents/${id}/comments`, d),
+
+  uploadFiles: (files) => {
+    const fd = new FormData()
+    files.forEach(f => fd.append('files', f))
+    return api.post('/files/upload', fd, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    })
+  },
 }
 
 // ── ZONES ─────────────────────────────────────────────────────────────────
@@ -34,7 +42,7 @@ export const zoneService = {
 export const notificationService = {
   getAll:        ()   => api.get('/notifications'),
   getUnread:     ()   => api.get('/notifications/unread'),
-  countUnread:   ()   => api.get('/notifications/unread/count'),
+  countUnread:   ()   => api.get('/notifications/unread'),
   markAsRead:    (id) => api.patch(`/notifications/${id}/read`),
   markAllAsRead: ()   => api.patch('/notifications/read-all'),
   delete:        (id) => api.delete(`/notifications/${id}`),
@@ -59,7 +67,7 @@ export const reportService = {
   generate: (data)   => api.post('/reports', data),
 }
 
-// ── AI (Spring AI) ────────────────────────────────────────────────────────
+// ── AI (GROQ) ─────────────────────────────────────────────────────────────
 export const aiService = {
   chat:          (data) => api.post('/ai/chat', data),
   classify:      (data) => api.post('/ai/classify', data),
