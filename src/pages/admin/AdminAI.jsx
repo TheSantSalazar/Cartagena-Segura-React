@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'lucide-react'
+import { useState, useEffect } from 'react'
 import { Sparkles, Loader2, Brain, MapPin, AlertTriangle, RefreshCw, TrendingUp, Zap } from 'lucide-react'
 import { aiService } from '@/services/services'
 
