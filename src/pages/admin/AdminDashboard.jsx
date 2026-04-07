@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import { AlertTriangle, Clock, CheckCircle, XCircle, Loader2, Sparkles, RefreshCw } from 'lucide-react'
+import { AlertTriangle, Clock, CheckCircle, XCircle, Loader2, Sparkles, RefreshCw, TrendingUp, Zap, Map } from 'lucide-react'
 import { incidentService, zoneService, aiService } from '@/services/services'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -8,74 +8,93 @@ import L from 'leaflet'
 delete L.Icon.Default.prototype._getIconUrl
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
-  iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
-  shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+  iconUrl:       'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+  shadowUrl:     'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
 })
 
-const priorityColor = { LOW: '#22c55e', MEDIUM: '#f59e0b', HIGH: '#f97316', CRITICAL: '#ef4444' }
-const statusLabel   = { PENDING: 'Pendiente', IN_PROGRESS: 'En progreso', RESOLVED: 'Resuelto', REJECTED: 'Rechazado' }
-const badgeColor    = { LOW: 'badge-low', MEDIUM: 'badge-medium', HIGH: 'badge-high', CRITICAL: 'badge-critical' }
+const P_COLOR = { LOW: '#10B981', MEDIUM: '#F59E0B', HIGH: '#F97316', CRITICAL: '#EF4444' }
+const S_LABEL = { PENDING: 'Pendiente', IN_PROGRESS: 'En progreso', RESOLVED: 'Resuelto', REJECTED: 'Rechazado' }
+const CENTER  = [10.3910, -75.4794]
 
-const createIcon = (color) => L.divIcon({
+const createIcon = color => L.divIcon({
   className: '',
-  html: `<div style="width:24px;height:24px;background:${color};border:2px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 6px rgba(0,0,0,0.3)"></div>`,
-  iconSize: [24, 24], iconAnchor: [12, 24], popupAnchor: [0, -28],
+  html: `<div style="width:22px;height:22px;background:${color};border:2px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px ${color}60"></div>`,
+  iconSize: [22, 22], iconAnchor: [11, 22], popupAnchor: [0, -26],
 })
 
-// Animated counter component
-function AnimatedCounter({ value, duration = 1000 }) {
+function useCountUp(target, duration = 1200) {
   const [count, setCount] = useState(0)
-  const frameRef = useRef(null)
-
+  const ref = useRef(null)
   useEffect(() => {
-    const num = parseInt(value)
-    if (isNaN(num) || num === 0) { setCount(0); return }
-
-    let startTime = null
-    const step = (timestamp) => {
-      if (!startTime) startTime = timestamp
-      const progress = Math.min((timestamp - startTime) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3) // ease-out cubic
-      setCount(Math.round(eased * num))
-      if (progress < 1) frameRef.current = requestAnimationFrame(step)
+    const n = parseInt(target)
+    if (isNaN(n)) return
+    let start = null
+    const step = ts => {
+      if (!start) start = ts
+      const p = Math.min((ts - start) / duration, 1)
+      setCount(Math.round((1 - Math.pow(1 - p, 3)) * n))
+      if (p < 1) ref.current = requestAnimationFrame(step)
     }
-    frameRef.current = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(frameRef.current)
-  }, [value, duration])
-
-  return <>{count}</>
+    ref.current = requestAnimationFrame(step)
+    return () => cancelAnimationFrame(ref.current)
+  }, [target, duration])
+  return count
 }
 
-const StatCard = ({ icon: Icon, label, value, color, sub, delay = 0 }) => (
-  <div
-    className="card p-4 sm:p-6 animate-slide-up-stagger"
-    style={{ animationDelay: `${delay}ms` }}
-  >
-    <div className="flex items-center justify-between mb-3 sm:mb-4">
-      <span className="text-xs sm:text-sm font-medium text-gray-500">{label}</span>
-      <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center ${color}`}>
-        <Icon className="w-4 h-4 sm:w-5 sm:h-5" />
+function StatCard({ icon: Icon, label, value, color, accent, sub, delay = 0 }) {
+  const count = useCountUp(value ?? 0)
+  return (
+    <div
+      className="animate-slide-up-stagger"
+      style={{
+        animationDelay: `${delay}ms`,
+        background: '#fff',
+        borderRadius: 20,
+        border: '1px solid #F1F5F9',
+        padding: '20px',
+        boxShadow: '0 1px 4px rgba(0,0,0,0.04)'
+      }}
+    >
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+        <p style={{ fontSize: 12, color: '#94A3B8', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>
+          {label}
+        </p>
+        <div
+          style={{
+            width: 36,
+            height: 36,
+            borderRadius: 12,
+            background: color,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <Icon size={16} style={{ color: accent }} />
+        </div>
       </div>
-    </div>
-    <p className="text-2xl sm:text-3xl font-bold text-gray-900">
-      {value != null ? <AnimatedCounter value={value} /> : '—'}
-    </p>
-    {sub && <p className="text-xs text-gray-400 mt-1">{sub}</p>}
-  </div>
-)
 
-const CENTER = [10.3910, -75.4794]
+      <p style={{ fontSize: 32, fontWeight: 900, color: '#0F172A', letterSpacing: '-0.03em', lineHeight: 1 }}>
+        {count}
+      </p>
+
+      {sub && (
+        <p style={{ fontSize: 11, color: '#94A3B8', marginTop: 6 }}>
+          {sub}
+        </p>
+      )}
+    </div>
+  )
+}
 
 export default function AdminDashboard() {
   const [incidents, setIncidents] = useState([])
   const [zones, setZones]         = useState([])
   const [loading, setLoading]     = useState(true)
-
-  // AI summary state
-  const [summaryText, setSummaryText] = useState('')
-  const [summaryLoading, setSummaryLoading] = useState(false)
-  const [summaryError, setSummaryError] = useState(false)
-  const [displayedText, setDisplayedText] = useState('')
+  const [summary, setSummary]     = useState('')
+  const [sumLoading, setSumLoading] = useState(false)
+  const [sumError, setSumError]   = useState(false)
+  const [displayed, setDisplayed] = useState('')
 
   useEffect(() => {
     Promise.all([incidentService.getAll(), zoneService.getAll()])
@@ -87,130 +106,126 @@ export default function AdminDashboard() {
       .finally(() => setLoading(false))
   }, [])
 
-  // Typewriter effect for AI summary
   useEffect(() => {
-    if (!summaryText) { setDisplayedText(''); return }
-    setDisplayedText('')
+    if (!summary) { setDisplayed(''); return }
+    setDisplayed('')
     let i = 0
-    const timer = setInterval(() => {
-      i++
-      setDisplayedText(summaryText.slice(0, i))
-      if (i >= summaryText.length) clearInterval(timer)
-    }, 16)
-    return () => clearInterval(timer)
-  }, [summaryText])
+    const t = setInterval(() => { i++; setDisplayed(summary.slice(0, i)); if (i >= summary.length) clearInterval(t) }, 14)
+    return () => clearInterval(t)
+  }, [summary])
 
-  const generateSummary = async () => {
-    setSummaryLoading(true)
-    setSummaryError(false)
-    setSummaryText('')
+  const genSummary = async () => {
+    setSumLoading(true); setSumError(false); setSummary('')
     try {
       const res = await aiService.summary()
-      const text = res.data?.summary ?? res.data?.message ?? res.data ?? 'Sin respuesta.'
-      setSummaryText(typeof text === 'string' ? text : JSON.stringify(text))
-    } catch {
-      setSummaryError(true)
-    } finally {
-      setSummaryLoading(false)
-    }
+      const txt = res.data?.summary ?? res.data?.message ?? res.data ?? ''
+      setSummary(typeof txt === 'string' ? txt : JSON.stringify(txt))
+    } catch { setSumError(true) }
+    finally { setSumLoading(false) }
   }
 
-  const pending    = incidents.filter(i => i.status === 'PENDING').length
-  const resolved   = incidents.filter(i => i.status === 'RESOLVED').length
-  const critical   = incidents.filter(i => i.priority === 'CRITICAL').length
+  const pending  = incidents.filter(i => i.status === 'PENDING').length
+  const resolved = incidents.filter(i => i.status === 'RESOLVED').length
+  const critical = incidents.filter(i => i.priority === 'CRITICAL').length
   const withCoords = incidents.filter(i => i.latitude && i.longitude)
 
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 animate-fade-in">
-      <div>
-        <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-sm text-gray-500 mt-0.5">Resumen general del sistema</p>
+    <div style={{ padding: '20px 16px 32px', fontFamily: "'DM Sans', system-ui, sans-serif", background: '#F8FAFC', minHeight: '100%' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800;900&display=swap');
+        @keyframes fadeUp { from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)} }
+        .dash-fade { animation: fadeUp 400ms ease-out both; }
+        .s1{animation-delay:0ms}.s2{animation-delay:60ms}.s3{animation-delay:120ms}.s4{animation-delay:180ms}.s5{animation-delay:240ms}
+        .inc-row { transition: all 0.2s; }
+        .inc-row:hover { background: #F8FAFC !important; }
+        .leaflet-popup-content-wrapper { border-radius: 14px !important; box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important; }
+        .leaflet-popup-tip-container { display: none; }
+      `}</style>
+
+      {/* Header */}
+      <div className="dash-fade s1" style={{ marginBottom: 20 }}>
+        <h1 style={{ fontSize: 22, fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em', marginBottom: 2 }}>Dashboard</h1>
+        <p style={{ fontSize: 13, color: '#94A3B8' }}>Resumen operativo del sistema</p>
       </div>
 
-      <div className="grid grid-cols-2 xl:grid-cols-4 gap-3 sm:gap-4">
-        <StatCard icon={AlertTriangle} label="Total" value={incidents.length} color="bg-blue-50 text-blue-600" sub="incidentes" delay={0} />
-        <StatCard icon={Clock} label="Pendientes" value={pending} color="bg-yellow-50 text-yellow-600" sub="sin atender" delay={100} />
-        <StatCard icon={CheckCircle} label="Resueltos" value={resolved} color="bg-green-50 text-green-600" sub="cerrados" delay={200} />
-        <StatCard icon={XCircle} label="Críticos" value={critical} color="bg-red-50 text-red-600" sub="urgentes" delay={300} />
+      {/* Stats */}
+      <div className="dash-fade s2" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginBottom: 20 }}>
+        <StatCard icon={AlertTriangle} label="Total"      value={incidents.length} color="rgba(59,130,246,0.1)"  accent="#3B82F6" sub="incidentes" delay={0}   />
+        <StatCard icon={Clock}         label="Pendientes" value={pending}           color="rgba(245,158,11,0.1)"  accent="#F59E0B" sub="sin atender" delay={60}  />
+        <StatCard icon={CheckCircle}   label="Resueltos"  value={resolved}          color="rgba(16,185,129,0.1)"  accent="#10B981" sub="cerrados" delay={120}    />
+        <StatCard icon={XCircle}       label="Críticos"   value={critical}          color="rgba(239,68,68,0.1)"   accent="#EF4444" sub="urgentes" delay={180}    />
       </div>
 
-      {/* AI Summary Card */}
-      <div className="card overflow-hidden border-purple-100">
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-purple-100 bg-gradient-to-r from-violet-50/80 to-purple-50/80 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
+      {/* AI Summary */}
+      <div className="dash-fade s3" style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', marginBottom: 20, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid #F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(139,92,246,0.04), rgba(59,130,246,0.03))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 11, background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Sparkles size={15} style={{ color: '#fff' }} />
             </div>
             <div>
-              <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Resumen IA</h2>
-              <p className="text-[10px] text-gray-400">Análisis generado por Spring AI</p>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Resumen IA</p>
+              <p style={{ fontSize: 10, color: '#94A3B8' }}>Análisis generado por Spring AI</p>
             </div>
           </div>
-          <button
-            onClick={generateSummary}
-            disabled={summaryLoading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 hover:bg-purple-700 disabled:opacity-50 text-white text-xs font-medium rounded-lg transition-colors"
-          >
-            {summaryLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <Sparkles className="w-3 h-3" />}
-            {summaryText ? 'Regenerar' : 'Generar'}
+          <button onClick={genSummary} disabled={sumLoading}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '7px 14px', borderRadius: 10, background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: sumLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: sumLoading ? 0.7 : 1 }}>
+            {sumLoading ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={12} />}
+            {summary ? 'Regenerar' : 'Generar'}
           </button>
         </div>
-        <div className="px-4 sm:px-6 py-4">
-          {!summaryText && !summaryLoading && !summaryError && (
-            <p className="text-sm text-gray-400 text-center py-4">
-              Haz clic en "Generar" para obtener un resumen inteligente del estado del sistema
-            </p>
+        <div style={{ padding: '14px 16px' }}>
+          {!summary && !sumLoading && !sumError && (
+            <p style={{ fontSize: 13, color: '#CBD5E1', textAlign: 'center', padding: '16px 0' }}>Haz clic en "Generar" para obtener un resumen inteligente del sistema</p>
           )}
-          {summaryLoading && (
-            <div className="flex items-center gap-3 py-4 justify-center">
-              <Loader2 className="w-4 h-4 animate-spin text-purple-500" />
-              <span className="text-sm text-gray-500">Generando resumen...</span>
+          {sumLoading && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', padding: '16px 0' }}>
+              <Loader2 size={16} style={{ color: '#8B5CF6', animation: 'spin 1s linear infinite' }} />
+              <span style={{ fontSize: 13, color: '#94A3B8' }}>Generando análisis...</span>
             </div>
           )}
-          {summaryError && (
-            <div className="bg-red-50 rounded-xl p-3 text-center">
-              <p className="text-red-600 text-xs font-medium">Servicio de IA no disponible</p>
-              <button onClick={generateSummary} className="mt-2 text-xs text-red-500 flex items-center gap-1 mx-auto">
-                <RefreshCw className="w-3 h-3" /> Reintentar
+          {sumError && (
+            <div style={{ padding: '12px', borderRadius: 12, background: '#FEF2F2', border: '1px solid #FECACA', textAlign: 'center' }}>
+              <p style={{ fontSize: 12, color: '#EF4444', fontWeight: 600, marginBottom: 8 }}>Servicio de IA no disponible</p>
+              <button onClick={genSummary} style={{ fontSize: 11, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4, margin: '0 auto' }}>
+                <RefreshCw size={11} /> Reintentar
               </button>
             </div>
           )}
-          {displayedText && !summaryLoading && (
-            <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-              {displayedText}
-              {displayedText.length < summaryText.length && <span className="typewriter-cursor ml-0.5">&nbsp;</span>}
+          {displayed && !sumLoading && (
+            <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.7, whiteSpace: 'pre-wrap' }}>
+              {displayed}
+              {displayed.length < summary.length && <span style={{ borderRight: '2px solid #8B5CF6', marginLeft: 2, animation: 'none' }}>&nbsp;</span>}
             </p>
           )}
         </div>
       </div>
 
       {/* Map */}
-      <div className="card overflow-hidden">
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Mapa de Incidentes</h2>
-          <span className="text-xs text-gray-400">{withCoords.length} con ubicación</span>
+      <div className="dash-fade s4" style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', marginBottom: 20, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid #F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 34, height: 34, borderRadius: 11, background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Map size={15} style={{ color: '#3B82F6' }} />
+            </div>
+            <div>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Mapa de Incidentes</p>
+              <p style={{ fontSize: 10, color: '#94A3B8' }}>{withCoords.length} con ubicación GPS</p>
+            </div>
+          </div>
         </div>
-        <div style={{ height: '300px', zIndex: 0 }} className="sm:h-96">
+        <div style={{ height: 300, zIndex: 0 }}>
           <MapContainer center={CENTER} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
+            <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {withCoords.map(inc => (
-              <Marker key={inc.id} position={[inc.latitude, inc.longitude]}
-                icon={createIcon(priorityColor[inc.priority] ?? '#6b7280')}>
+              <Marker key={inc.id} position={[inc.latitude, inc.longitude]} icon={createIcon(P_COLOR[inc.priority] ?? '#6B7280')}>
                 <Popup>
-                  <div className="p-1 min-w-[140px]">
-                    <p className="font-bold text-gray-900 text-sm">{inc.type}</p>
-                    <p className="text-xs text-gray-500 mt-1">{inc.description}</p>
-                    {inc.location && <p className="text-xs text-gray-400 mt-1">📍 {inc.location}</p>}
-                    <p className="text-xs text-gray-400 mt-1">👤 {inc.reportedBy}</p>
-                    <div className="mt-2 flex items-center gap-1">
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full text-white"
-                        style={{ background: priorityColor[inc.priority] ?? '#6b7280' }}>
-                        {inc.priority}
-                      </span>
-                      <span className="text-xs text-gray-400">{statusLabel[inc.status]}</span>
+                  <div style={{ padding: '10px 12px', minWidth: 160 }}>
+                    <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 4 }}>{inc.type}</p>
+                    {inc.description && <p style={{ fontSize: 11, color: '#64748B', marginBottom: 6 }}>{inc.description.slice(0, 60)}...</p>}
+                    <div style={{ display: 'flex', gap: 6 }}>
+                      <span style={{ fontSize: 10, fontWeight: 700, padding: '2px 8px', borderRadius: 6, background: `${P_COLOR[inc.priority] ?? '#6B7280'}15`, color: P_COLOR[inc.priority] ?? '#6B7280' }}>{inc.priority}</span>
+                      <span style={{ fontSize: 10, padding: '2px 8px', borderRadius: 6, background: '#F1F5F9', color: '#64748B' }}>{S_LABEL[inc.status]}</span>
                     </div>
                   </div>
                 </Popup>
@@ -220,48 +235,30 @@ export default function AdminDashboard() {
         </div>
       </div>
 
-      {/* Recent Incidents */}
-      <div className="card">
-        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100 flex items-center justify-between">
-          <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Incidentes Recientes</h2>
-          <span className="text-xs text-gray-400">{incidents.length} total</span>
+      {/* Recent incidents */}
+      <div className="dash-fade s5" style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', overflow: 'hidden' }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid #F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A' }}>Incidentes Recientes</p>
+          <span style={{ fontSize: 11, color: '#94A3B8' }}>{incidents.length} total</span>
         </div>
-        <div className="divide-y divide-gray-50">
-          {loading ? (
-            <div className="p-8 flex justify-center"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>
-          ) : incidents.length === 0 ? (
-            <div className="p-8 text-center text-gray-400 text-sm">No hay incidentes registrados</div>
-          ) : incidents.slice(0, 8).map(inc => (
-            <div key={inc.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-3 sm:gap-4 hover:bg-gray-50">
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-gray-900 truncate">{inc.type}</p>
-                <p className="text-xs text-gray-400 truncate">{inc.description}</p>
-              </div>
-              <span className={`${badgeColor[inc.priority] ?? 'badge-low'} hidden sm:inline-flex`}>{inc.priority}</span>
-              <span className="text-xs text-gray-400 whitespace-nowrap">{statusLabel[inc.status]}</span>
+        {loading ? (
+          <div style={{ padding: 32, textAlign: 'center' }}>
+            <Loader2 size={20} style={{ color: '#CBD5E1', animation: 'spin 1s linear infinite', display: 'inline-block' }} />
+          </div>
+        ) : incidents.slice(0, 8).map((inc, i) => (
+          <div key={inc.id} className="inc-row" style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', borderBottom: i < 7 ? '1px solid #F8FAFC' : 'none', background: '#fff' }}>
+            <div style={{ width: 36, height: 36, borderRadius: 12, background: `${P_COLOR[inc.priority] ?? '#6B7280'}10`, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+              <AlertTriangle size={15} style={{ color: P_COLOR[inc.priority] ?? '#6B7280' }} />
             </div>
-          ))}
-        </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <p style={{ fontSize: 13, fontWeight: 700, color: '#0F172A', marginBottom: 2 }}>{inc.type}</p>
+              <p style={{ fontSize: 11, color: '#94A3B8', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{inc.description || inc.location || '—'}</p>
+            </div>
+            <span style={{ fontSize: 10, fontWeight: 700, padding: '3px 8px', borderRadius: 6, color: P_COLOR[inc.priority] ?? '#6B7280', background: `${P_COLOR[inc.priority] ?? '#6B7280'}12`, whiteSpace: 'nowrap' }}>{inc.priority}</span>
+            <span style={{ fontSize: 11, color: '#94A3B8', whiteSpace: 'nowrap', display: 'none' }} className="sm:block">{S_LABEL[inc.status]}</span>
+          </div>
+        ))}
       </div>
-
-      {zones.length > 0 && (
-        <div className="card">
-          <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-100">
-            <h2 className="font-semibold text-gray-900 text-sm sm:text-base">Zonas Registradas</h2>
-          </div>
-          <div className="divide-y divide-gray-50">
-            {zones.map(zone => (
-              <div key={zone.id} className="px-4 sm:px-6 py-3 sm:py-4 flex items-center gap-4 hover:bg-gray-50">
-                <div className="flex-1">
-                  <p className="text-sm font-medium text-gray-900">{zone.name}</p>
-                  <p className="text-xs text-gray-400">{zone.totalIncidents ?? 0} incidentes</p>
-                </div>
-                <span className={badgeColor[zone.riskLevel] ?? 'badge-low'}>{zone.riskLevel}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   )
 }

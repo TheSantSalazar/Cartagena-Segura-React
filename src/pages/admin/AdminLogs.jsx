@@ -1,60 +1,108 @@
 import { useEffect, useState } from 'react'
 import { logService } from '@/services/services'
-import { FileText, Loader2, RefreshCw } from 'lucide-react'
+import { FileText, Loader2, RefreshCw, Search, Activity } from 'lucide-react'
 
-const levelColors = { INFO: 'bg-blue-100 text-blue-700', WARN: 'bg-yellow-100 text-yellow-700', ERROR: 'bg-red-100 text-red-700', DEBUG: 'bg-gray-100 text-gray-600' }
+const LEVEL_CONFIG = {
+  INFO:  { color: '#3B82F6', bg: 'rgba(59,130,246,0.1)'  },
+  WARN:  { color: '#F59E0B', bg: 'rgba(245,158,11,0.1)'  },
+  ERROR: { color: '#EF4444', bg: 'rgba(239,68,68,0.1)'   },
+  DEBUG: { color: '#94A3B8', bg: 'rgba(148,163,184,0.1)' },
+}
 
 export default function AdminLogs() {
   const [logs, setLogs]       = useState([])
   const [loading, setLoading] = useState(true)
+  const [search, setSearch]   = useState('')
+  const [level, setLevel]     = useState('ALL')
 
   const load = () => {
     setLoading(true)
     logService.getAll()
-      .then(res => setLogs(res.data?.data ?? res.data ?? []))
+      .then(r => setLogs(r.data?.data ?? r.data ?? []))
       .catch(() => setLogs([]))
       .finally(() => setLoading(false))
   }
-
   useEffect(() => { load() }, [])
 
+  const filtered = logs.filter(l => {
+    const matchLevel = level === 'ALL' || (l.level ?? 'INFO') === level
+    const matchSearch = !search || (l.message ?? l.action ?? '').toLowerCase().includes(search.toLowerCase()) || (l.userId ?? '').toLowerCase().includes(search.toLowerCase())
+    return matchLevel && matchSearch
+  })
+
   return (
-    <div className="p-4 sm:p-6 space-y-4 sm:space-y-6 animate-fade-in">
-      <div className="flex items-center justify-between">
+    <div style={{ padding: '20px 16px 32px', fontFamily: "'DM Sans', system-ui, sans-serif", background: '#F8FAFC', minHeight: '100%' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+        .log-fade { animation: fadeUp 400ms ease-out both; }
+        .s1{animation-delay:0ms}.s2{animation-delay:60ms}.s3{animation-delay:120ms}
+        .log-row { transition: background 0.15s; border-bottom: 1px solid #F8FAFC; }
+        .log-row:hover { background: #F8FAFC !important; }
+        .admin-input { width:100%;padding:10px 14px;background:#F8FAFC;border:1px solid #E2E8F0;border-radius:12px;font-size:13px;color:#0F172A;font-family:inherit;outline:none;transition:all 0.2s;box-sizing:border-box; }
+        .admin-input:focus { border-color:#3B82F6;box-shadow:0 0 0 3px rgba(59,130,246,0.12); }
+        .lvl-chip { transition: all 0.2s; cursor: pointer; border: none; font-family: inherit; }
+      `}</style>
+
+      {/* Header */}
+      <div className="log-fade s1" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-gray-900">Logs del Sistema</h1>
-          <p className="text-sm text-gray-500 mt-0.5">Registro de actividad</p>
+          <h1 style={{ fontSize: 22, fontWeight: 900, color: '#0F172A', letterSpacing: '-0.02em', marginBottom: 2 }}>Logs del Sistema</h1>
+          <p style={{ fontSize: 13, color: '#94A3B8' }}>{logs.length} registros de actividad</p>
         </div>
-        <button onClick={load} className="flex items-center gap-2 px-3 sm:px-4 py-2 border border-gray-200 rounded-xl text-sm font-medium text-gray-600 hover:bg-gray-50">
-          <RefreshCw className="w-4 h-4" /><span className="hidden sm:inline">Actualizar</span>
+        <button onClick={load} disabled={loading}
+          style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 14px', borderRadius: 12, border: '1px solid #E2E8F0', background: '#fff', color: '#64748B', fontWeight: 600, fontSize: 13, cursor: 'pointer', fontFamily: 'inherit', transition: 'all 0.2s' }}>
+          <RefreshCw size={13} style={{ animation: loading ? 'spin 1s linear infinite' : 'none' }} /> Actualizar
         </button>
       </div>
-      <div className="card">
+
+      {/* Filters */}
+      <div className="log-fade s2" style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 16 }}>
+        <div style={{ position: 'relative' }}>
+          <Search size={14} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: '#CBD5E1' }} />
+          <input className="admin-input" value={search} onChange={e => setSearch(e.target.value)} placeholder="Buscar en logs..." style={{ paddingLeft: 36 }} />
+        </div>
+        <div style={{ display: 'flex', gap: 8, overflowX: 'auto', paddingBottom: 2 }}>
+          {['ALL', 'INFO', 'WARN', 'ERROR', 'DEBUG'].map(l => {
+            const cfg = LEVEL_CONFIG[l]
+            return (
+              <button key={l} className="lvl-chip" onClick={() => setLevel(l)}
+                style={{ padding: '6px 14px', borderRadius: 100, fontSize: 12, fontWeight: 700, whiteSpace: 'nowrap', background: level === l ? (cfg?.color ?? '#1D4ED8') : '#fff', color: level === l ? '#fff' : '#64748B', border: level === l ? `1px solid ${cfg?.color ?? '#1D4ED8'}` : '1px solid #E2E8F0' }}>
+                {l}
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* Logs */}
+      <div className="log-fade s3" style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', overflow: 'hidden', fontFamily: 'inherit' }}>
         {loading ? (
-          <div className="flex justify-center py-12"><Loader2 className="w-6 h-6 animate-spin text-primary-500" /></div>
-        ) : logs.length === 0 ? (
-          <div className="p-12 text-center">
-            <FileText className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-            <p className="text-gray-400 text-sm">No hay logs registrados</p>
+          <div style={{ padding: 48, textAlign: 'center' }}><Loader2 size={22} style={{ color: '#CBD5E1', animation: 'spin 1s linear infinite', display: 'inline-block' }} /></div>
+        ) : filtered.length === 0 ? (
+          <div style={{ padding: '48px 20px', textAlign: 'center' }}>
+            <FileText size={28} style={{ color: '#E2E8F0', display: 'block', margin: '0 auto 12px' }} />
+            <p style={{ fontSize: 14, color: '#94A3B8', fontWeight: 600 }}>Sin logs</p>
           </div>
-        ) : (
-          <div className="divide-y divide-gray-50">
-            {logs.map((log, i) => (
-              <div key={log.id ?? i} className="p-4 sm:px-6 sm:py-4 flex items-start gap-3 hover:bg-gray-50">
-                <span className={`text-xs px-2 py-0.5 rounded-full font-medium mt-0.5 whitespace-nowrap flex-shrink-0 ${levelColors[log.level] ?? 'bg-gray-100 text-gray-600'}`}>
-                  {log.level ?? 'INFO'}
-                </span>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-900">{log.message ?? log.action ?? 'Sin mensaje'}</p>
-                  {log.userId && <p className="text-xs text-gray-400 mt-0.5">Usuario: {log.userId}</p>}
-                </div>
-                <span className="text-xs text-gray-400 whitespace-nowrap flex-shrink-0 hidden sm:block">
-                  {log.createdAt ? new Date(log.createdAt).toLocaleString('es-CO') : '—'}
-                </span>
+        ) : filtered.map((log, i) => {
+          const cfg = LEVEL_CONFIG[log.level ?? 'INFO'] ?? LEVEL_CONFIG.INFO
+          return (
+            <div key={log.id ?? i} className="log-row" style={{ display: 'flex', alignItems: 'flex-start', gap: 12, padding: '12px 16px', background: '#fff' }}>
+              <span style={{ fontSize: 10, fontWeight: 800, padding: '3px 8px', borderRadius: 6, background: cfg.bg, color: cfg.color, whiteSpace: 'nowrap', flexShrink: 0, marginTop: 1, letterSpacing: '0.04em' }}>
+                {log.level ?? 'INFO'}
+              </span>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <p style={{ fontSize: 13, color: '#0F172A', lineHeight: 1.5, marginBottom: log.userId ? 3 : 0 }}>{log.message ?? log.action ?? 'Sin mensaje'}</p>
+                {log.userId && <p style={{ fontSize: 11, color: '#94A3B8' }}>Usuario: {log.userId}</p>}
               </div>
-            ))}
-          </div>
-        )}
+              {log.createdAt && (
+                <span style={{ fontSize: 10, color: '#CBD5E1', whiteSpace: 'nowrap', flexShrink: 0, marginTop: 2 }}>
+                  {new Date(log.createdAt).toLocaleString('es-CO', { dateStyle: 'short', timeStyle: 'short' })}
+                </span>
+              )}
+            </div>
+          )
+        })}
       </div>
     </div>
   )

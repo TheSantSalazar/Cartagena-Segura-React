@@ -1,192 +1,143 @@
-import { useState, useEffect, useRef, useCallback } from 'react'
-import { Sparkles, Loader2, Brain, MapPin, AlertTriangle, TrendingUp, RefreshCw } from 'lucide-react'
+import { useState, useEffect } from 'lucide-react'
+import { Sparkles, Loader2, Brain, MapPin, AlertTriangle, RefreshCw, TrendingUp, Zap } from 'lucide-react'
 import { aiService } from '@/services/services'
 
-function TypewriterText({ text, speed = 18 }) {
+function TypewriterText({ text, speed = 14 }) {
   const [displayed, setDisplayed] = useState('')
   const [done, setDone] = useState(false)
-
   useEffect(() => {
     if (!text) return
-    setDisplayed('')
-    setDone(false)
+    setDisplayed(''); setDone(false)
     let i = 0
-    const timer = setInterval(() => {
-      i++
-      setDisplayed(text.slice(0, i))
-      if (i >= text.length) {
-        clearInterval(timer)
-        setDone(true)
-      }
-    }, speed)
-    return () => clearInterval(timer)
+    const t = setInterval(() => { i++; setDisplayed(text.slice(0, i)); if (i >= text.length) { clearInterval(t); setDone(true) } }, speed)
+    return () => clearInterval(t)
   }, [text, speed])
-
-  return (
-    <span>
-      {displayed}
-      {!done && <span className="typewriter-cursor ml-0.5">&nbsp;</span>}
-    </span>
-  )
+  return <span>{displayed}{!done && <span style={{ borderRight: '2px solid #8B5CF6', marginLeft: 2 }}>&nbsp;</span>}</span>
 }
 
-function AnimatedCounter({ value, duration = 1200 }) {
-  const [count, setCount] = useState(0)
-  const ref = useRef(null)
-
-  useEffect(() => {
-    const num = parseInt(value)
-    if (isNaN(num) || num === 0) { setCount(value); return }
-
-    let start = 0
-    const startTime = performance.now()
-    const step = (now) => {
-      const progress = Math.min((now - startTime) / duration, 1)
-      const eased = 1 - Math.pow(1 - progress, 3)
-      setCount(Math.round(eased * num))
-      if (progress < 1) ref.current = requestAnimationFrame(step)
-    }
-    ref.current = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(ref.current)
-  }, [value, duration])
-
-  return <>{count}</>
+const RISK_CONFIG = {
+  LOW:      { color: '#10B981', bg: 'rgba(16,185,129,0.08)',  label: 'Bajo'    },
+  MEDIUM:   { color: '#F59E0B', bg: 'rgba(245,158,11,0.08)',  label: 'Medio'   },
+  HIGH:     { color: '#F97316', bg: 'rgba(249,115,22,0.08)',  label: 'Alto'    },
+  CRITICAL: { color: '#EF4444', bg: 'rgba(239,68,68,0.08)',   label: 'Crítico' },
 }
-
-export { TypewriterText, AnimatedCounter }
 
 export default function AdminAI() {
-  const [summaryText, setSummaryText] = useState('')
-  const [summaryLoading, setSummaryLoading] = useState(false)
-  const [summaryTime, setSummaryTime] = useState(null)
-  const [summaryError, setSummaryError] = useState(false)
-
-  const [zones, setZones] = useState([])
+  const [summary, setSummary]       = useState('')
+  const [sumLoading, setSumLoading] = useState(false)
+  const [sumError, setSumError]     = useState(false)
+  const [sumTime, setSumTime]       = useState(null)
+  const [zones, setZones]           = useState([])
   const [zonesLoading, setZonesLoading] = useState(false)
   const [zonesError, setZonesError] = useState(false)
 
-  const generateSummary = async () => {
-    setSummaryLoading(true)
-    setSummaryError(false)
-    setSummaryText('')
+  const genSummary = async () => {
+    setSumLoading(true); setSumError(false); setSummary('')
     try {
-      const res = await aiService.summary()
-      const text = res.data?.summary ?? res.data?.message ?? res.data ?? 'Sin respuesta.'
-      setSummaryText(typeof text === 'string' ? text : JSON.stringify(text))
-      setSummaryTime(new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }))
-    } catch {
-      setSummaryError(true)
-      setSummaryText('')
-    } finally {
-      setSummaryLoading(false)
-    }
+      const r = await aiService.summary()
+      const txt = r.data?.summary ?? r.data?.message ?? r.data ?? ''
+      setSummary(typeof txt === 'string' ? txt : JSON.stringify(txt))
+      setSumTime(new Date().toLocaleTimeString('es-CO', { hour: '2-digit', minute: '2-digit' }))
+    } catch { setSumError(true) }
+    finally { setSumLoading(false) }
   }
 
   const analyzeZones = async () => {
-    setZonesLoading(true)
-    setZonesError(false)
-    setZones([])
+    setZonesLoading(true); setZonesError(false); setZones([])
     try {
-      const res = await aiService.zonesAnalysis()
-      const data = res.data?.zones ?? res.data?.data ?? res.data ?? []
-      setZones(Array.isArray(data) ? data : [])
-    } catch {
-      setZonesError(true)
-    } finally {
-      setZonesLoading(false)
-    }
-  }
-
-  const riskGradient = {
-    LOW: 'from-green-500 to-emerald-600',
-    MEDIUM: 'from-yellow-500 to-amber-600',
-    HIGH: 'from-orange-500 to-red-500',
-    CRITICAL: 'from-red-500 to-rose-700',
-  }
-  const riskBg = {
-    LOW: 'bg-green-50 border-green-200',
-    MEDIUM: 'bg-yellow-50 border-yellow-200',
-    HIGH: 'bg-orange-50 border-orange-200',
-    CRITICAL: 'bg-red-50 border-red-200',
+      const r = await aiService.zonesAnalysis()
+      const d = r.data?.zones ?? r.data?.data ?? r.data ?? []
+      setZones(Array.isArray(d) ? d : [])
+    } catch { setZonesError(true) }
+    finally { setZonesLoading(false) }
   }
 
   return (
-    <div className="p-4 sm:p-6 space-y-6 animate-fade-in">
-      {/* Header */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-primary-950 via-primary-900 to-slate-900 p-6 sm:p-8">
-        <div className="absolute inset-0 opacity-20" style={{ backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,.15) 1px, transparent 0)', backgroundSize: '24px 24px' }} />
-        <div className="pointer-events-none absolute -right-12 -top-12 h-40 w-40 rounded-full bg-primary-400/20 blur-3xl" />
-        <div className="relative flex items-center gap-4">
-          <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex items-center justify-center">
-            <Brain className="w-6 h-6 text-primary-300" />
+    <div style={{ padding: '20px 16px 32px', fontFamily: "'DM Sans', system-ui, sans-serif", background: '#F8FAFC', minHeight: '100%' }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        @keyframes fadeUp { from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:translateY(0)} }
+        .aai-fade { animation: fadeUp 400ms ease-out both; }
+        .s1{animation-delay:0ms}.s2{animation-delay:80ms}.s3{animation-delay:160ms}
+        .zone-ai-card { transition: all 0.2s; }
+        .zone-ai-card:hover { transform: translateY(-2px); }
+      `}</style>
+
+      {/* Header banner */}
+      <div className="aai-fade s1" style={{ borderRadius: 20, padding: '20px', background: 'linear-gradient(135deg, #0F172A, #1E3A5F, #1D4ED8)', marginBottom: 20, position: 'relative', overflow: 'hidden' }}>
+        <div style={{ position: 'absolute', inset: 0, backgroundImage: 'radial-gradient(circle at 1px 1px, rgba(255,255,255,0.05) 1px, transparent 0)', backgroundSize: '22px 22px' }} />
+        <div style={{ position: 'absolute', top: -40, right: -40, width: 160, height: 160, borderRadius: '50%', background: 'rgba(139,92,246,0.15)', filter: 'blur(30px)' }} />
+        <div style={{ position: 'relative', display: 'flex', alignItems: 'center', gap: 14 }}>
+          <div style={{ width: 48, height: 48, borderRadius: 16, background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Brain size={24} style={{ color: '#A78BFA' }} />
           </div>
-          <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">Asistente de Inteligencia Artificial</h1>
-            <p className="text-primary-300 text-sm mt-0.5">Análisis y resúmenes potenciados por Spring AI</p>
+          <div style={{ flex: 1 }}>
+            <h1 style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 2 }}>Asistente de IA</h1>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Análisis potenciados por Spring AI + Groq</p>
           </div>
-          <span className="ml-auto hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary-400/20 border border-primary-400/30 text-primary-200 text-xs font-medium">
-            <span className="w-1.5 h-1.5 rounded-full bg-primary-400 animate-pulse" />
-            BETA
-          </span>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 100, background: 'rgba(167,139,250,0.2)', border: '1px solid rgba(167,139,250,0.3)' }}>
+            <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#A78BFA' }} className="animate-pulse" />
+            <span style={{ fontSize: 10, color: '#C4B5FD', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Beta</span>
+          </div>
         </div>
       </div>
 
-      {/* Summary Section */}
-      <div className="card overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
-              <Sparkles className="w-4 h-4 text-white" />
+      {/* Summary card */}
+      <div className="aai-fade s2" style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', marginBottom: 16, overflow: 'hidden' }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid #F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(139,92,246,0.04), rgba(59,130,246,0.02))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 12, background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <Sparkles size={16} style={{ color: '#fff' }} />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900 text-sm sm:text-base">Resumen Inteligente del Sistema</h2>
-              <p className="text-xs text-gray-400">La IA analiza todos los incidentes y genera un resumen narrativo</p>
-            </div>
-          </div>
-          {summaryTime && (
-            <span className="text-xs text-gray-400 hidden sm:block">Generado a las {summaryTime}</span>
-          )}
-        </div>
-
-        <div className="p-5">
-          {!summaryText && !summaryLoading && !summaryError && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-violet-100 to-purple-100 flex items-center justify-center">
-                <Sparkles className="w-7 h-7 text-purple-500" />
-              </div>
-              <p className="text-gray-500 text-sm mb-4">Genera un resumen narrativo del estado actual del sistema</p>
-              <button onClick={generateSummary} className="btn-primary gap-2">
-                <Sparkles className="w-4 h-4" /> Generar Resumen con IA
-              </button>
-            </div>
-          )}
-
-          {summaryLoading && (
-            <div className="flex items-center gap-3 py-8 justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-purple-500" />
-              <span className="text-sm text-gray-500">Analizando datos del sistema...</span>
-            </div>
-          )}
-
-          {summaryError && (
-            <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
-              <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-              <p className="text-red-600 text-sm font-medium">No se pudo conectar con el servicio de IA</p>
-              <p className="text-red-400 text-xs mt-1">El backend de Spring AI no está disponible en este momento</p>
-              <button onClick={generateSummary} className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1.5 mx-auto">
-                <RefreshCw className="w-3.5 h-3.5" /> Reintentar
-              </button>
-            </div>
-          )}
-
-          {summaryText && !summaryLoading && (
-            <div className="bg-gradient-to-br from-violet-50/50 to-purple-50/50 rounded-xl p-5 border border-purple-100">
-              <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                <TypewriterText text={summaryText} />
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>Resumen Inteligente</p>
+              <p style={{ fontSize: 11, color: '#94A3B8' }}>
+                {sumTime ? `Generado a las ${sumTime}` : 'Análisis narrativo del estado del sistema'}
               </p>
-              <div className="flex justify-end mt-4 pt-3 border-t border-purple-100">
-                <button onClick={generateSummary} className="text-xs text-purple-600 hover:text-purple-700 font-medium flex items-center gap-1.5">
-                  <RefreshCw className="w-3 h-3" /> Regenerar
+            </div>
+          </div>
+          <button onClick={genSummary} disabled={sumLoading}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: sumLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: sumLoading ? 0.7 : 1 }}>
+            {sumLoading ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Sparkles size={12} />}
+            {summary ? 'Regenerar' : 'Generar'}
+          </button>
+        </div>
+        <div style={{ padding: '16px' }}>
+          {!summary && !sumLoading && !sumError && (
+            <div style={{ padding: '24px 0', textAlign: 'center' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 18, background: 'rgba(139,92,246,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                <Sparkles size={24} style={{ color: '#8B5CF6' }} />
+              </div>
+              <p style={{ fontSize: 13, color: '#94A3B8', marginBottom: 16 }}>Genera un análisis narrativo del estado actual del sistema</p>
+              <button onClick={genSummary}
+                style={{ padding: '10px 24px', borderRadius: 12, background: 'linear-gradient(135deg, #7C3AED, #8B5CF6)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <Sparkles size={14} /> Generar Resumen con IA
+              </button>
+            </div>
+          )}
+          {sumLoading && (
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', padding: '24px 0' }}>
+              <Loader2 size={18} style={{ color: '#8B5CF6', animation: 'spin 1s linear infinite' }} />
+              <span style={{ fontSize: 13, color: '#94A3B8' }}>Analizando datos del sistema...</span>
+            </div>
+          )}
+          {sumError && (
+            <div style={{ padding: '12px', borderRadius: 12, background: '#FEF2F2', border: '1px solid #FECACA', textAlign: 'center' }}>
+              <AlertTriangle size={20} style={{ color: '#EF4444', display: 'block', margin: '0 auto 8px' }} />
+              <p style={{ fontSize: 12, color: '#EF4444', fontWeight: 600, marginBottom: 8 }}>Servicio de IA no disponible</p>
+              <button onClick={genSummary} style={{ fontSize: 12, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <RefreshCw size={11} /> Reintentar
+              </button>
+            </div>
+          )}
+          {summary && !sumLoading && (
+            <div style={{ padding: '14px', borderRadius: 14, background: 'linear-gradient(135deg, rgba(139,92,246,0.04), rgba(59,130,246,0.02))', border: '1px solid rgba(139,92,246,0.12)' }}>
+              <p style={{ fontSize: 13, color: '#374151', lineHeight: 1.75, whiteSpace: 'pre-wrap' }}>
+                <TypewriterText text={summary} />
+              </p>
+              <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12, paddingTop: 10, borderTop: '1px solid rgba(139,92,246,0.1)' }}>
+                <button onClick={genSummary} style={{ fontSize: 11, color: '#7C3AED', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'flex', alignItems: 'center', gap: 4 }}>
+                  <RefreshCw size={11} /> Regenerar
                 </button>
               </div>
             </div>
@@ -194,79 +145,69 @@ export default function AdminAI() {
         </div>
       </div>
 
-      {/* Zones Analysis Section */}
-      <div className="card overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-600 flex items-center justify-center">
-              <MapPin className="w-4 h-4 text-white" />
+      {/* Zones analysis card */}
+      <div className="aai-fade s3" style={{ background: '#fff', borderRadius: 20, border: '1px solid #F1F5F9', overflow: 'hidden' }}>
+        <div style={{ padding: '14px 16px', borderBottom: '1px solid #F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'linear-gradient(135deg, rgba(59,130,246,0.04), rgba(6,182,212,0.02))' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+            <div style={{ width: 36, height: 36, borderRadius: 12, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <MapPin size={16} style={{ color: '#fff' }} />
             </div>
             <div>
-              <h2 className="font-bold text-gray-900 text-sm sm:text-base">Análisis de Zonas de Riesgo</h2>
-              <p className="text-xs text-gray-400">La IA evalúa patrones de incidentes por zona y recomienda acciones</p>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>Análisis de Zonas</p>
+              <p style={{ fontSize: 11, color: '#94A3B8' }}>IA evalúa patrones y recomienda acciones por zona</p>
             </div>
           </div>
+          <button onClick={analyzeZones} disabled={zonesLoading}
+            style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 10, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', fontWeight: 700, fontSize: 12, border: 'none', cursor: zonesLoading ? 'not-allowed' : 'pointer', fontFamily: 'inherit', opacity: zonesLoading ? 0.7 : 1 }}>
+            {zonesLoading ? <Loader2 size={12} style={{ animation: 'spin 1s linear infinite' }} /> : <Brain size={12} />}
+            {zones.length ? 'Re-analizar' : 'Analizar'}
+          </button>
         </div>
-
-        <div className="p-5">
-          {zones.length === 0 && !zonesLoading && !zonesError && (
-            <div className="text-center py-8">
-              <div className="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gradient-to-br from-blue-100 to-cyan-100 flex items-center justify-center">
-                <TrendingUp className="w-7 h-7 text-blue-500" />
+        <div style={{ padding: '16px' }}>
+          {!zones.length && !zonesLoading && !zonesError && (
+            <div style={{ padding: '24px 0', textAlign: 'center' }}>
+              <div style={{ width: 52, height: 52, borderRadius: 18, background: 'rgba(59,130,246,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 12px' }}>
+                <TrendingUp size={24} style={{ color: '#3B82F6' }} />
               </div>
-              <p className="text-gray-500 text-sm mb-4">Analiza las zonas registradas y obtén recomendaciones de acción</p>
-              <button onClick={analyzeZones} className="btn-primary gap-2">
-                <Brain className="w-4 h-4" /> Analizar Zonas con IA
+              <p style={{ fontSize: 13, color: '#94A3B8', marginBottom: 16 }}>Analiza las zonas registradas y obtén recomendaciones de acción</p>
+              <button onClick={analyzeZones}
+                style={{ padding: '10px 24px', borderRadius: 12, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 8 }}>
+                <Brain size={14} /> Analizar Zonas con IA
               </button>
             </div>
           )}
-
           {zonesLoading && (
-            <div className="flex items-center gap-3 py-8 justify-center">
-              <Loader2 className="w-5 h-5 animate-spin text-blue-500" />
-              <span className="text-sm text-gray-500">Analizando patrones de incidentes por zona...</span>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 10, justifyContent: 'center', padding: '24px 0' }}>
+              <Loader2 size={18} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
+              <span style={{ fontSize: 13, color: '#94A3B8' }}>Analizando patrones por zona...</span>
             </div>
           )}
-
           {zonesError && (
-            <div className="bg-red-50 border border-red-100 rounded-xl p-4 text-center">
-              <AlertTriangle className="w-8 h-8 text-red-400 mx-auto mb-2" />
-              <p className="text-red-600 text-sm font-medium">No se pudo conectar con el servicio de IA</p>
-              <p className="text-red-400 text-xs mt-1">El backend de Spring AI no está disponible</p>
-              <button onClick={analyzeZones} className="mt-3 text-sm text-red-600 hover:text-red-700 font-medium flex items-center gap-1.5 mx-auto">
-                <RefreshCw className="w-3.5 h-3.5" /> Reintentar
+            <div style={{ padding: '12px', borderRadius: 12, background: '#FEF2F2', border: '1px solid #FECACA', textAlign: 'center' }}>
+              <p style={{ fontSize: 12, color: '#EF4444', fontWeight: 600, marginBottom: 8 }}>IA no disponible</p>
+              <button onClick={analyzeZones} style={{ fontSize: 12, color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit', display: 'inline-flex', alignItems: 'center', gap: 4 }}>
+                <RefreshCw size={11} /> Reintentar
               </button>
             </div>
           )}
-
           {zones.length > 0 && !zonesLoading && (
-            <div className="grid gap-3 sm:grid-cols-2">
-              {zones.map((zone, i) => (
-                <div
-                  key={zone.name || i}
-                  className={`rounded-xl border p-4 animate-slide-up-stagger ${riskBg[zone.riskLevel] ?? 'bg-gray-50 border-gray-200'}`}
-                  style={{ animationDelay: `${i * 80}ms` }}
-                >
-                  <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-semibold text-gray-900 text-sm">{zone.name}</h3>
-                    <span className={`text-xs font-bold px-2 py-0.5 rounded-full text-white bg-gradient-to-r ${riskGradient[zone.riskLevel] ?? 'from-gray-400 to-gray-500'}`}>
-                      {zone.riskLevel}
-                    </span>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))', gap: 10 }}>
+              {zones.map((z, i) => {
+                const rc = RISK_CONFIG[z.riskLevel] ?? RISK_CONFIG.LOW
+                return (
+                  <div key={z.name ?? i} className="zone-ai-card"
+                    style={{ padding: '14px', borderRadius: 14, background: rc.bg, border: `1px solid ${rc.color}20` }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 8 }}>
+                      <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A' }}>{z.name}</p>
+                      <span style={{ fontSize: 10, fontWeight: 800, padding: '2px 8px', borderRadius: 6, background: rc.color, color: '#fff' }}>{rc.label}</span>
+                    </div>
+                    {z.recommendation && <p style={{ fontSize: 12, color: '#475569', lineHeight: 1.5, marginBottom: 8 }}>{z.recommendation}</p>}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 10, color: rc.color, fontWeight: 600 }}>
+                      <Brain size={10} /> Analizado por IA
+                    </div>
                   </div>
-                  {zone.recommendation && (
-                    <p className="text-xs text-gray-600 leading-relaxed">{zone.recommendation}</p>
-                  )}
-                  <div className="flex items-center gap-1 mt-2">
-                    <Brain className="w-3 h-3 text-primary-500" />
-                    <span className="text-[10px] text-primary-600 font-medium">Analizado por IA</span>
-                  </div>
-                </div>
-              ))}
-              <div className="sm:col-span-2 flex justify-end pt-2">
-                <button onClick={analyzeZones} className="text-xs text-blue-600 hover:text-blue-700 font-medium flex items-center gap-1.5">
-                  <RefreshCw className="w-3 h-3" /> Re-analizar
-                </button>
-              </div>
+                )
+              })}
             </div>
           )}
         </div>
