@@ -1,114 +1,141 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, AlertTriangle, Map, FileText, Phone, LogOut, Menu, X, BarChart2, Brain } from 'lucide-react'
+import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
+import {
+  LayoutDashboard, AlertTriangle, Map, Phone, FileText,
+  BarChart2, LogOut, Menu, X, Sparkles, ChevronRight, Shield
+} from 'lucide-react'
 import useAuthStore from '@/store/authStore'
+import NotificationPanel from '@/components/NotificationPanel'
 
 const navItems = [
-  { to: '/admin',           icon: LayoutDashboard, label: 'Dashboard',   end: true },
-  { to: '/admin/incidents', icon: AlertTriangle,   label: 'Incidentes'  },
-  { to: '/admin/zones',     icon: Map,             label: 'Zonas'       },
-  { to: '/admin/emergency', icon: Phone,           label: 'Emergencias' },
-  { to: '/admin/logs',      icon: FileText,        label: 'Logs'        },
-  { to: '/admin/reports',   icon: BarChart2,       label: 'Reportes'    },
-  { to: '/admin/ai',        icon: Brain,           label: 'Asistente IA', badge: 'BETA' },
+  { to: '/admin',           icon: LayoutDashboard, label: 'Dashboard',    end: true  },
+  { to: '/admin/incidents', icon: AlertTriangle,   label: 'Incidentes'               },
+  { to: '/admin/zones',     icon: Map,             label: 'Zonas'                    },
+  { to: '/admin/emergency', icon: Phone,           label: 'Emergencias'              },
+  { to: '/admin/logs',      icon: FileText,        label: 'Logs'                     },
+  { to: '/admin/reports',   icon: BarChart2,       label: 'Reportes'                 },
+  { to: '/admin/ai',        icon: Sparkles,        label: 'IA',           special: true },
 ]
 
 export default function AdminLayout() {
   const { user, logout } = useAuthStore()
   const navigate = useNavigate()
   const [sidebarOpen, setSidebarOpen] = useState(false)
-
   const handleLogout = () => { logout(); navigate('/login') }
+  const initial = user?.username?.[0]?.toUpperCase() ?? 'A'
 
   const SidebarContent = () => (
-    <>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
       {/* Logo */}
-      <div className="flex items-center justify-between px-6 py-5 border-b border-primary-800">
-        <div className="flex items-center gap-3">
-          <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura"
-            className="w-9 h-9 rounded-xl object-contain flex-shrink-0" />
+      <div style={{ padding: '20px 16px 16px', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 36, height: 36, borderRadius: 12, background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.25)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <img src="/Ctg_Seg-Logo.png" alt="Logo" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+          </div>
           <div>
-            <p className="text-white font-bold text-sm leading-tight">Cartagena</p>
-            <p className="text-primary-400 text-xs">Panel Admin</p>
+            <p style={{ fontSize: 13, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', lineHeight: 1.2 }}>Cartagena Segura</p>
+            <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Panel Admin</p>
           </div>
         </div>
-        <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-primary-400 hover:text-white">
-          <X className="w-5 h-5" />
-        </button>
       </div>
 
       {/* Nav */}
-      <nav className="flex-1 px-3 py-4 space-y-1">
-        {navItems.map(({ to, icon: Icon, label, end, badge }) => (
-          <NavLink key={to} to={to} end={end}
-            onClick={() => setSidebarOpen(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-150
-              ${isActive ? 'bg-primary-600 text-white shadow-lg' : 'text-primary-300 hover:bg-primary-800 hover:text-white'}`
-            }>
-            <Icon className="w-4 h-4" />
-            {label}
-            {badge && (
-              <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-md bg-primary-400/30 text-primary-200 animate-pulse">
-                {badge}
-              </span>
-            )}
-          </NavLink>
-        ))}
+      <nav style={{ flex: 1, padding: '12px 10px', overflowY: 'auto' }}>
+        <p style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '0 8px', marginBottom: 8 }}>Navegación</p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+          {navItems.map(({ to, icon: Icon, label, end, special }) => (
+            <NavLink key={to} to={to} end={end} onClick={() => setSidebarOpen(false)}
+              style={{ textDecoration: 'none' }}>
+              {({ isActive }) => (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, background: isActive ? 'rgba(59,130,246,0.15)' : 'transparent', border: isActive ? '1px solid rgba(59,130,246,0.25)' : '1px solid transparent', transition: 'all 0.2s', cursor: 'pointer' }}
+                  onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
+                  onMouseLeave={e => { if (!isActive) e.currentTarget.style.background = 'transparent' }}>
+                  <div style={{ width: 32, height: 32, borderRadius: 10, background: isActive ? 'rgba(59,130,246,0.2)' : special ? 'rgba(139,92,246,0.12)' : 'rgba(255,255,255,0.06)', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                    <Icon size={15} style={{ color: isActive ? '#60A5FA' : special ? '#A78BFA' : 'rgba(255,255,255,0.5)' }} />
+                  </div>
+                  <span style={{ fontSize: 13, fontWeight: isActive ? 700 : 500, color: isActive ? '#fff' : 'rgba(255,255,255,0.55)', flex: 1 }}>{label}</span>
+                  {isActive && <ChevronRight size={12} style={{ color: '#60A5FA' }} />}
+                  {special && !isActive && <span style={{ fontSize: 9, fontWeight: 700, padding: '2px 6px', borderRadius: 5, background: 'rgba(139,92,246,0.2)', color: '#A78BFA' }}>AI</span>}
+                </div>
+              )}
+            </NavLink>
+          ))}
+        </div>
       </nav>
 
       {/* User */}
-      <div className="px-3 py-4 border-t border-primary-800">
-        <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-primary-800/50 mb-2">
-          <div className="w-8 h-8 bg-primary-600 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
-            {user?.username?.[0]?.toUpperCase() ?? 'A'}
+      <div style={{ padding: '12px', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '10px', borderRadius: 14, background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.06)' }}>
+          <div style={{ width: 34, height: 34, borderRadius: '50%', background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 13, fontWeight: 800, color: '#fff', flexShrink: 0 }}>{initial}</div>
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <p style={{ fontSize: 12, fontWeight: 700, color: '#fff', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{user?.username}</p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+              <Shield size={9} style={{ color: '#60A5FA' }} />
+              <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.35)' }}>Administrador</p>
+            </div>
           </div>
-          <div className="flex-1 min-w-0">
-            <p className="text-white text-sm font-medium truncate">{user?.username}</p>
-            <p className="text-primary-400 text-xs">Administrador</p>
-          </div>
+          <button onClick={handleLogout}
+            style={{ width: 28, height: 28, borderRadius: 9, border: 'none', background: 'rgba(239,68,68,0.15)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <LogOut size={12} style={{ color: '#FCA5A5' }} />
+          </button>
         </div>
-        <button onClick={handleLogout}
-          className="flex items-center gap-3 w-full px-3 py-2.5 rounded-xl text-sm font-medium text-primary-300 hover:bg-red-500/20 hover:text-red-400 transition-all">
-          <LogOut className="w-4 h-4" />
-          Cerrar sesión
-        </button>
       </div>
-    </>
+    </div>
   )
 
   return (
-    <div className="flex h-screen bg-gray-50 overflow-hidden">
+    <div style={{ display: 'flex', height: '100dvh', background: '#F8FAFC', fontFamily: "'DM Sans', system-ui, sans-serif" }}>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
+        @keyframes sidebarIn { from{opacity:0;transform:translateX(-100%)}to{opacity:1;transform:translateX(0)} }
+        .sidebar-mobile { animation: sidebarIn 300ms cubic-bezier(0.16,1,0.3,1) both; }
+        @media(min-width:768px) { .sidebar-mobile-overlay { display: none !important; } }
+      `}</style>
 
-      {/* Overlay móvil */}
+      {/* Sidebar desktop */}
+      <aside style={{ width: 240, background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.06)', flexShrink: 0, display: 'flex', flexDirection: 'column' }} className="hidden md:flex">
+        <SidebarContent />
+      </aside>
+
+      {/* Sidebar mobile overlay */}
       {sidebarOpen && (
-        <div className="fixed inset-0 bg-black/50 z-40 lg:hidden"
-          onClick={() => setSidebarOpen(false)} />
+        <div style={{ position: 'fixed', inset: 0, zIndex: 200 }}>
+          <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }} onClick={() => setSidebarOpen(false)} />
+          <aside className="sidebar-mobile" style={{ position: 'absolute', left: 0, top: 0, bottom: 0, width: 260, background: '#0F172A', display: 'flex', flexDirection: 'column' }}>
+            <div style={{ position: 'absolute', top: 12, right: 12 }}>
+              <button onClick={() => setSidebarOpen(false)} style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(255,255,255,0.08)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <X size={14} style={{ color: '#fff' }} />
+              </button>
+            </div>
+            <SidebarContent />
+          </aside>
+        </div>
       )}
 
-      {/* SIDEBAR desktop */}
-      <aside className="hidden lg:flex w-64 bg-primary-950 flex-col shrink-0">
-        <SidebarContent />
-      </aside>
-
-      {/* SIDEBAR móvil (drawer) */}
-      <aside className={`fixed inset-y-0 left-0 z-50 w-64 bg-primary-950 flex flex-col transition-transform duration-300 lg:hidden
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <SidebarContent />
-      </aside>
-
-      {/* MAIN */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top bar móvil */}
-        <header className="lg:hidden bg-white border-b border-gray-100 px-4 py-3 flex items-center gap-3 shrink-0">
-          <button onClick={() => setSidebarOpen(true)} className="text-gray-600 hover:text-gray-900">
-            <Menu className="w-5 h-5" />
-          </button>
-          <img src="/Ctg_Seg-Logo.png" alt="Logo" className="w-7 h-7 object-contain" />
-          <span className="font-bold text-gray-900 text-sm">Cartagena Segura</span>
+      {/* Main */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        {/* Top bar */}
+        <header style={{ height: 56, background: '#fff', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button onClick={() => setSidebarOpen(true)} style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid #F1F5F9', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="md:hidden">
+              <Menu size={16} style={{ color: '#64748B' }} />
+            </button>
+            <div>
+              <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Panel de Administración</p>
+              <p style={{ fontSize: 11, color: '#94A3B8' }}>Cartagena Segura · Sistema operativo</p>
+            </div>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 5, padding: '5px 10px', borderRadius: 100, background: 'rgba(16,185,129,0.08)', border: '1px solid rgba(16,185,129,0.15)' }}>
+              <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34D399' }} className="animate-pulse" />
+              <span style={{ fontSize: 11, color: '#065F46', fontWeight: 600 }}>Sistema activo</span>
+            </div>
+            <NotificationPanel />
+          </div>
         </header>
 
-        <main className="flex-1 overflow-auto">
+        {/* Content */}
+        <main style={{ flex: 1, overflowY: 'auto' }}>
           <Outlet />
         </main>
       </div>
