@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Outlet, NavLink, useNavigate, Link } from 'react-router-dom'
+import { Outlet, NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, AlertTriangle, Map, Phone, FileText,
   BarChart2, LogOut, Menu, X, Sparkles, ChevronRight, Shield
@@ -44,8 +44,7 @@ export default function AdminLayout() {
         <p style={{ fontSize: 9, fontWeight: 700, color: 'rgba(255,255,255,0.25)', textTransform: 'uppercase', letterSpacing: '0.12em', padding: '0 8px', marginBottom: 8 }}>Navegación</p>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
           {navItems.map(({ to, icon: Icon, label, end, special }) => (
-            <NavLink key={to} to={to} end={end} onClick={() => setSidebarOpen(false)}
-              style={{ textDecoration: 'none' }}>
+            <NavLink key={to} to={to} end={end} onClick={() => setSidebarOpen(false)} style={{ textDecoration: 'none' }}>
               {({ isActive }) => (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '10px 12px', borderRadius: 12, background: isActive ? 'rgba(59,130,246,0.15)' : 'transparent', border: isActive ? '1px solid rgba(59,130,246,0.25)' : '1px solid transparent', transition: 'all 0.2s', cursor: 'pointer' }}
                   onMouseEnter={e => { if (!isActive) e.currentTarget.style.background = 'rgba(255,255,255,0.05)' }}
@@ -89,11 +88,13 @@ export default function AdminLayout() {
         @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700;800&display=swap');
         @keyframes sidebarIn { from{opacity:0;transform:translateX(-100%)}to{opacity:1;transform:translateX(0)} }
         .sidebar-mobile { animation: sidebarIn 300ms cubic-bezier(0.16,1,0.3,1) both; }
-        @media(min-width:768px) { .sidebar-mobile-overlay { display: none !important; } }
       `}</style>
 
-      {/* Sidebar desktop */}
-      <aside style={{ width: 240, background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.06)', flexShrink: 0, display: 'flex', flexDirection: 'column' }} className="hidden md:flex">
+      {/* ✅ Sidebar desktop — SIN display en style, Tailwind lo controla */}
+      <aside
+        style={{ width: 240, background: '#0F172A', borderRight: '1px solid rgba(255,255,255,0.06)', flexShrink: 0 }}
+        className="hidden md:flex flex-col"
+      >
         <SidebarContent />
       </aside>
 
@@ -117,9 +118,16 @@ export default function AdminLayout() {
         {/* Top bar */}
         <header style={{ height: 56, background: '#fff', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-            <button onClick={() => setSidebarOpen(true)} style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid #F1F5F9', background: '#F8FAFC', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }} className="md:hidden">
+
+            {/* ✅ Botón hamburguesa — SIN display en style, Tailwind lo controla */}
+            <button
+              onClick={() => setSidebarOpen(true)}
+              style={{ width: 34, height: 34, borderRadius: 10, border: '1px solid #F1F5F9', background: '#F8FAFC', cursor: 'pointer', alignItems: 'center', justifyContent: 'center' }}
+              className="flex md:hidden"
+            >
               <Menu size={16} style={{ color: '#64748B' }} />
             </button>
+
             <div>
               <p style={{ fontSize: 14, fontWeight: 700, color: '#0F172A', letterSpacing: '-0.01em' }}>Panel de Administración</p>
               <p style={{ fontSize: 11, color: '#94A3B8' }}>Cartagena Segura · Sistema operativo</p>
