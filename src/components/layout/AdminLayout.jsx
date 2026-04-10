@@ -7,6 +7,7 @@ import {
 import useAuthStore from '@/store/authStore'
 import NotificationPanel from '@/components/NotificationPanel'
 
+
 const navItems = [
   { to: '/admin',           icon: LayoutDashboard, label: 'Dashboard',    end: true  },
   { to: '/admin/incidents', icon: AlertTriangle,   label: 'Incidentes'               },
@@ -14,7 +15,7 @@ const navItems = [
   { to: '/admin/emergency', icon: Phone,           label: 'Emergencias'              },
   { to: '/admin/logs',      icon: FileText,        label: 'Logs'                     },
   { to: '/admin/reports',   icon: BarChart2,       label: 'Reportes'                 },
-  { to: '/admin/ai',        icon: Sparkles,        label: 'IA',           special: true },
+  { to: '/admin/ai',        icon: Sparkles,        label: 'Asistente Virtual',  special: true },
 ]
 
 export default function AdminLayout() {
@@ -146,6 +147,8 @@ export default function AdminLayout() {
         <main style={{ flex: 1, overflowY: 'auto' }}>
           <Outlet />
         </main>
+
+
       </div>
     </div>
   )

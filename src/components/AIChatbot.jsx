@@ -4,7 +4,7 @@ import { aiService } from '@/services/services'
 
 const WELCOME = {
   role: 'assistant',
-  content: '¡Hola! 👋 Soy el asistente de **Cartagena Segura**. Puedo ayudarte con:\n\n• Cómo reportar incidentes correctamente\n• Protocolos de emergencia en Cartagena\n• Estado de seguridad en tu zona\n• Dudas sobre la plataforma\n\n¿En qué te puedo ayudar?',
+  content: '¡Hola! 👋 Soy el **Agente Inteligente de Cartagena Segura**. Mi misión es asistirte en la gestión de incidentes y seguridad ciudadana.\n\n¿En qué puedo apoyarte hoy?\n\n• Reportar un incidente\n• Consultar zonas de riesgo\n• Protocolos de emergencia',
 }
 
 function fmt(text) {
@@ -77,10 +77,10 @@ export default function AIChatbot() {
                 <Sparkles size={18} style={{ color: '#fff' }} />
               </div>
               <div style={{ flex: 1 }}>
-                <p style={{ fontSize: 14, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>Asistente IA</p>
+                <p style={{ fontSize: 14, fontWeight: 800, color: '#fff', letterSpacing: '-0.01em' }}>Agente Cartagena Segura</p>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34D399' }} className="animate-pulse" />
-                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.55)' }}>Activo · Spring AI + Groq</p>
+                  <p style={{ fontSize: 10, color: 'rgba(255,255,255,0.7)' }}>IA Operativa • LLM v3.1</p>
                 </div>
               </div>
               <div style={{ display: 'flex', gap: 6 }}>

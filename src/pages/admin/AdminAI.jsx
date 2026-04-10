@@ -1,18 +1,102 @@
 import { useState, useEffect } from 'react'
-import { Sparkles, Loader2, Brain, MapPin, AlertTriangle, RefreshCw, TrendingUp, Zap } from 'lucide-react'
+import { Sparkles, Loader2, Brain, MapPin, AlertTriangle, RefreshCw, TrendingUp, Zap, Send, User, Bot } from 'lucide-react'
 import { aiService } from '@/services/services'
 
-function TypewriterText({ text, speed = 14 }) {
+function RichAssistantText({ text }) {
+  if (!text) return null;
+  
+  // Dividir por líneas y filtrar vacías extra para mejor espaciado
+  const lines = text.split('\n');
+  
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+      {lines.map((line, i) => {
+        const trimmedLine = line.trim();
+        if (!trimmedLine) return <div key={i} style={{ height: '8px' }} />;
+        
+        // Detectar Listas (Bullets * o Numeradas 1., 2.)
+        const listMatch = line.match(/^(\s*)([*-]|\d+\.)\s+(.*)/);
+        const isList = !!listMatch;
+        const content = isList ? listMatch[3] : trimmedLine;
+
+        // Procesar negritas **texto** usando una expresión regular global
+        // Dividimos la línea buscando los pares de **
+        const parts = content.split(/(\*\*[^*]+\*\*)/g);
+        
+        const formattedLine = parts.map((part, index) => {
+          if (part.startsWith('**') && part.endsWith('**')) {
+            return (
+              <strong key={index} style={{ 
+                fontWeight: 700, 
+                color: '#1E293B',
+                background: 'rgba(139, 92, 246, 0.05)',
+                padding: '0 2px',
+                borderRadius: '2px'
+              }}>
+                {part.slice(2, -2)}
+              </strong>
+            );
+          }
+          return part;
+        });
+
+        return (
+          <div key={i} style={{ 
+            paddingLeft: isList ? '24px' : '0', 
+            position: 'relative',
+            lineHeight: '1.6',
+            fontSize: '14px',
+            color: '#334155'
+          }}>
+            {isList && (
+              <span style={{ 
+                position: 'absolute', 
+                left: '4px', 
+                color: '#8B5CF6', 
+                fontWeight: 'bold',
+                fontSize: listMatch[2].includes('.') ? '12px' : '16px'
+              }}>
+                {listMatch[2].includes('.') ? listMatch[2] : '•'}
+              </span>
+            )}
+            {formattedLine}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+function TypewriterText({ text, speed = 10 }) {
   const [displayed, setDisplayed] = useState('')
   const [done, setDone] = useState(false)
+  
   useEffect(() => {
     if (!text) return
     setDisplayed(''); setDone(false)
     let i = 0
-    const t = setInterval(() => { i++; setDisplayed(text.slice(0, i)); if (i >= text.length) { clearInterval(t); setDone(true) } }, speed)
+    const t = setInterval(() => { 
+      i++; 
+      setDisplayed(text.slice(0, i)); 
+      if (i >= text.length) { 
+        clearInterval(t); 
+        setDone(true) 
+      } 
+    }, speed)
     return () => clearInterval(t)
   }, [text, speed])
-  return <span>{displayed}{!done && <span style={{ borderRight: '2px solid #8B5CF6', marginLeft: 2 }}>&nbsp;</span>}</span>
+  
+  if (done) return <RichAssistantText text={text} />;
+  
+  // Mientras escribe, limpiamos los asteriscos para que no se vean feos
+  const cleanDisplay = displayed.replace(/\*\*/g, '');
+  
+  return (
+    <div style={{ whiteSpace: 'pre-wrap', lineHeight: '1.6', fontSize: '14px', color: '#334155' }}>
+      {cleanDisplay}
+      {!done && <span style={{ borderRight: '2px solid #8B5CF6', marginLeft: 2 }} className="animate-pulse">&nbsp;</span>}
+    </div>
+  );
 }
 
 const RISK_CONFIG = {
@@ -30,6 +114,12 @@ export default function AdminAI() {
   const [zones, setZones]           = useState([])
   const [zonesLoading, setZonesLoading] = useState(false)
   const [zonesError, setZonesError] = useState(false)
+  
+  // Chat states
+  const [chatMsgs, setChatMsgs] = useState([{ role: 'assistant', content: 'Hola Administrador. Tengo acceso a los últimos incidentes y estados de zona. ¿En qué puedo ayudarte hoy?' }])
+  const [chatInput, setChatInput] = useState('')
+  const [chatLoading, setChatLoading] = useState(false)
+  const chatEndRef = useState(null)
 
   const genSummary = async () => {
     setSumLoading(true); setSumError(false); setSummary('')
@@ -52,6 +142,22 @@ export default function AdminAI() {
     finally { setZonesLoading(false) }
   }
 
+  const sendChatMessage = async () => {
+    const text = chatInput.trim()
+    if (!text || chatLoading) return
+    setChatMsgs(p => [...p, { role: 'user', content: text }])
+    setChatInput('')
+    setChatLoading(true)
+    try {
+      // Usamos el endpoint del ChatbotAgent que ya implementamos con contexto
+      const res = await aiService.chat({ message: text })
+      const reply = res.data?.reply ?? res.data?.message ?? res.data ?? 'Sin respuesta.'
+      setChatMsgs(p => [...p, { role: 'assistant', content: reply }])
+    } catch {
+      setChatMsgs(p => [...p, { role: 'assistant', content: 'Error de conexión.' }])
+    } finally { setChatLoading(false) }
+  }
+
   return (
     <div style={{ padding: '20px 16px 32px', fontFamily: "'DM Sans', system-ui, sans-serif", background: '#F8FAFC', minHeight: '100%' }}>
       <style>{`
@@ -72,12 +178,52 @@ export default function AdminAI() {
             <Brain size={24} style={{ color: '#A78BFA' }} />
           </div>
           <div style={{ flex: 1 }}>
-            <h1 style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 2 }}>Asistente de IA</h1>
-            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Análisis potenciados por Spring AI + Groq</p>
+            <h1 style={{ fontSize: 18, fontWeight: 800, color: '#fff', letterSpacing: '-0.02em', marginBottom: 2 }}>Asistente Virtual</h1>
+            <p style={{ fontSize: 12, color: 'rgba(255,255,255,0.5)' }}>Centro de operaciones con IA Inteligente</p>
           </div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '5px 12px', borderRadius: 100, background: 'rgba(167,139,250,0.2)', border: '1px solid rgba(167,139,250,0.3)' }}>
             <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#A78BFA' }} className="animate-pulse" />
             <span style={{ fontSize: 10, color: '#C4B5FD', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Beta</span>
+          </div>
+        </div>
+      </div>
+
+      {/* Embedded Chat Card */}
+      <div className="aai-fade s1" style={{ background: '#fff', borderRadius: 20, border: '1px solid #E2E8F0', marginBottom: 16, display: 'flex', flexDirection: 'column', height: 400, overflow: 'hidden', boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)' }}>
+        <div style={{ padding: '12px 16px', background: '#F8FAFC', borderBottom: '1px solid #E2E8F0', display: 'flex', alignItems: 'center', gap: 10 }}>
+          <div style={{ width: 32, height: 32, borderRadius: 10, background: 'rgba(59,130,246,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            <Bot size={18} style={{ color: '#3B82F6' }} />
+          </div>
+          <p style={{ fontSize: 14, fontWeight: 700, color: '#1E293B' }}>Chat con el Agente (Contexto Activo)</p>
+        </div>
+        
+        <div style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+          {chatMsgs.map((m, i) => (
+            <div key={i} style={{ display: 'flex', gap: 10, flexDirection: m.role === 'user' ? 'row-reverse' : 'row' }}>
+              <div style={{ width: 28, height: 28, borderRadius: 8, background: m.role === 'user' ? '#3B82F6' : '#F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                {m.role === 'user' ? <User size={14} style={{ color: '#fff' }} /> : <Bot size={14} style={{ color: '#3B82F6' }} />}
+              </div>
+              <div style={{ maxWidth: '85%', padding: '10px 14px', borderRadius: 14, fontSize: 13, background: m.role === 'user' ? '#3B82F6' : '#F8FAFC', color: m.role === 'user' ? '#fff' : '#1E293B', border: m.role === 'user' ? 'none' : '1px solid #E2E8F0' }}>
+                {m.role === 'assistant' ? <RichAssistantText text={m.content} /> : m.content}
+              </div>
+            </div>
+          ))}
+          {chatLoading && <div style={{ fontSize: 11, color: '#94A3B8', fontStyle: 'italic', paddingLeft: 40 }}>El agente está consultando la base de datos...</div>}
+        </div>
+
+        <div style={{ padding: '12px', borderTop: '1px solid #E2E8F0', background: '#fff' }}>
+          <div style={{ display: 'flex', gap: 8, background: '#F8FAFC', borderRadius: 12, padding: '8px 12px', border: '1px solid #E2E8F0' }}>
+            <input 
+              value={chatInput} 
+              onChange={e => setChatInput(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && sendChatMessage()}
+              placeholder="Pregunta sobre incidentes o zonas..."
+              style={{ flex: 1, background: 'none', border: 'none', outline: 'none', fontSize: 13 }}
+            />
+            <button onClick={sendChatMessage} disabled={!chatInput.trim() || chatLoading}
+              style={{ width: 30, height: 30, borderRadius: 8, background: '#3B82F6', border: 'none', color: '#fff', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: chatInput.trim() ? 1 : 0.5 }}>
+              <Send size={14} />
+            </button>
           </div>
         </div>
       </div>
