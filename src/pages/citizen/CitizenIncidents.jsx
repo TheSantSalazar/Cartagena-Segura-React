@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { incidentService, aiService } from '@/services/services'
 import {
   AlertTriangle, Plus, X, Loader2, MapPin, Navigation,
@@ -189,6 +190,24 @@ export default function CitizenIncidents() {
       .finally(() => setLoading(false))
   }
   useEffect(() => { load() }, [])
+
+  /* ── URL Params Handle ── */
+  const [searchParams] = useSearchParams()
+  useEffect(() => {
+    const id = searchParams.get('id')
+    if (id) {
+      // Intentamos buscarlo en la lista actual
+      const found = incidents.find(x => String(x.id) === String(id))
+      if (found) {
+        setViewingInc(found)
+      } else if (!loading && incidents.length > 0) {
+        // Si no está y ya terminó de cargar, intentamos traerlo directo
+        incidentService.getById(id)
+          .then(res => setViewingInc(res.data?.data ?? res.data))
+          .catch(() => {})
+      }
+    }
+  }, [searchParams, incidents, loading])
 
   /* ── AI Classification ── */
   const classifyDescription = useCallback(async (desc) => {

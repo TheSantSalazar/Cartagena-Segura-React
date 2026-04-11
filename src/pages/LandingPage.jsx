@@ -5,6 +5,7 @@ import {
   Lock, Map, Phone, ShieldCheck, Sparkles, Users, ChevronDown,
   Zap, Eye, Globe, TrendingUp
 } from 'lucide-react'
+import { incidentService, zoneService } from '@/services/services'
 
 /* ── Hooks ────────────────────────────────────────────────────────────── */
 function useInView(threshold = 0.15) {
@@ -52,7 +53,7 @@ const stats = [
 ]
 
 const journey = [
-  { step: '01', title: 'Crea tu cuenta', desc: 'Registro rápido en menos de 2 minutos. Solo necesitas tu correo o teléfono.' },
+  { step: '01', title: 'Regístrate ahora', desc: 'Registro rápido en menos de 2 minutos. Solo necesitas tu correo o teléfono.' },
   { step: '02', title: 'Reporta con evidencia', desc: 'Describe el incidente, adjunta fotos o videos y comparte tu ubicación GPS exacta.' },
   { step: '03', title: 'Haz seguimiento en vivo', desc: 'Consulta el estado del caso, recibe notificaciones y visualiza la respuesta de autoridades.' },
 ]
@@ -82,9 +83,34 @@ function StatCard({ stat, active }) {
 export default function LandingPage() {
   const [scrollY, setScrollY] = useState(0)
   const [statsRef, statsInView] = useInView(0.3)
+  const [liveStats, setLiveStats] = useState({ total: 847, resolved: 98, zones: 40 })
   const [featRef, featInView] = useInView(0.1)
   const [journeyRef, journeyInView] = useInView(0.1)
   const [ctaRef, ctaInView] = useInView(0.2)
+
+  useEffect(() => {
+    // Cargar estadísticas reales
+    Promise.all([
+      incidentService.getAll().catch(() => null),
+      zoneService.getAll().catch(() => null)
+    ]).then(([incRes, zoneRes]) => {
+      // Si incRes o zoneRes son null es porque el backend dio 403 (lo cual es normal si no hay sesión)
+      const incs = incRes?.data?.data ?? incRes?.data ?? []
+      const zones = zoneRes?.data?.data ?? zoneRes?.data ?? []
+      
+      const totalCount = incs.length > 0 ? incs.length : 847
+      const zoneCount = zones.length > 0 ? zones.length : 40
+      
+      const resolved = incs.filter(i => i.status === 'RESOLVED').length
+      const rate = incs.length > 0 ? Math.round((resolved / incs.length) * 100) : 98
+      
+      setLiveStats({
+        total: totalCount,
+        resolved: rate,
+        zones: zoneCount
+      })
+    })
+  }, [])
 
   useEffect(() => {
     const onScroll = () => setScrollY(window.scrollY)
@@ -229,7 +255,7 @@ export default function LandingPage() {
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
             <div style={{ position: 'relative' }} className="pulse-ring">
               <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(59,130,246,0.15)', border: '1px solid rgba(59,130,246,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                <img src="/Ctg_Seg-Logo.png" alt="Logo" style={{ width: 22, height: 22, objectFit: 'contain' }} />
+                <img src="/logo-full.png" alt="Logo" style={{ width: 22, height: 22, objectFit: 'contain' }} />
               </div>
             </div>
             <div>
@@ -246,7 +272,7 @@ export default function LandingPage() {
             <Link to="/register" style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, fontSize: 14, fontWeight: 600, color: '#fff', textDecoration: 'none', background: 'linear-gradient(135deg, #2563EB, #3B82F6)', boxShadow: '0 4px 20px rgba(37,99,235,0.35)', transition: 'all 0.2s' }}
               onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 6px 28px rgba(37,99,235,0.5)' }}
               onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 4px 20px rgba(37,99,235,0.35)' }}>
-              Crear cuenta <ArrowRight size={14} />
+              Registrarse <ArrowRight size={14} />
             </Link>
           </div>
         </div>
@@ -294,7 +320,7 @@ export default function LandingPage() {
                 <Link to="/register" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 28px', borderRadius: 14, fontWeight: 700, fontSize: 15, color: '#fff', textDecoration: 'none', background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 8px 32px rgba(29,78,216,0.4), 0 0 0 1px rgba(59,130,246,0.3)', transition: 'all 0.3s' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 48px rgba(29,78,216,0.5), 0 0 0 1px rgba(59,130,246,0.4)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 32px rgba(29,78,216,0.4), 0 0 0 1px rgba(59,130,246,0.3)' }}>
-                  Empezar gratis <ArrowRight size={16} />
+                  Registrarse <ArrowRight size={16} />
                 </Link>
                 <Link to="/login" style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '14px 24px', borderRadius: 14, fontWeight: 600, fontSize: 15, color: 'rgba(255,255,255,0.65)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', transition: 'all 0.3s' }}
                   onMouseEnter={e => { e.currentTarget.style.color = '#fff'; e.currentTarget.style.background = 'rgba(255,255,255,0.08)' }}
@@ -314,8 +340,11 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right — Dashboard mockup */}
+            {/* Right — Dashboard mockup + Real Preview */}
             <div className="hero-right" style={{ position: 'relative' }}>
+              {/* Actual Image Preview Background */}
+              <div style={{ position: 'absolute', inset: '-20px', background: 'url(/preview-dashboard.png)', backgroundSize: 'cover', backgroundPosition: 'center', opacity: 0.15, filter: 'blur(40px)', pointerEvents: 'none' }} />
+              
               {/* Main card */}
               <div style={{ borderRadius: 24, border: '1px solid rgba(255,255,255,0.08)', background: 'rgba(255,255,255,0.03)', backdropFilter: 'blur(20px)', padding: 24, boxShadow: '0 32px 80px rgba(0,0,0,0.5)', position: 'relative', overflow: 'hidden' }}>
                 <div className="scan-line" />
@@ -400,7 +429,13 @@ export default function LandingPage() {
         <div style={{ maxWidth: 1200, margin: '0 auto' }}>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }} className="stats-grid">
             <style>{`@media(max-width:768px){.stats-grid{grid-template-columns:repeat(2,1fr)!important}}`}</style>
-            {stats.map((stat, i) => (
+            {/* Use liveStats here */}
+            {[
+              { value: liveStats.total, suffix: '+', label: 'Reportes gestionados', icon: TrendingUp },
+              { value: 24, suffix: '/7', label: 'Monitoreo continuo', icon: Eye },
+              { value: liveStats.zones, suffix: ' barrios', label: 'Conectados activamente', icon: Globe },
+              { value: liveStats.resolved, suffix: '%', label: 'Tasa de resolución', icon: CheckCircle2 },
+            ].map((stat, i) => (
               <div key={i} className={`reveal stagger-${i + 1} ${statsInView ? 'visible' : ''}`}>
                 <StatCard stat={stat} active={statsInView} />
               </div>
@@ -432,6 +467,10 @@ export default function LandingPage() {
                   style={{ padding: 28, borderRadius: 20, border: '1px solid rgba(255,255,255,0.07)', background: 'rgba(255,255,255,0.03)', cursor: 'default', position: 'relative', overflow: 'hidden' }}
                   onMouseEnter={e => { e.currentTarget.style.borderColor = `${feat.accent}30`; e.currentTarget.style.background = feat.bg }}
                   onMouseLeave={e => { e.currentTarget.style.borderColor = 'rgba(255,255,255,0.07)'; e.currentTarget.style.background = 'rgba(255,255,255,0.03)' }}>
+                  
+                  {/* Background Illustration for specific cards */}
+                  {i === 4 && <img src="/illust-community.svg" alt="" style={{ position: 'absolute', right: -20, bottom: -20, width: 120, opacity: 0.05, pointerEvents: 'none' }} />}
+
                   <div style={{ width: 44, height: 44, borderRadius: 14, background: feat.bg, border: `1px solid ${feat.accent}25`, display: 'flex', alignItems: 'center', justifyContent: 'center', marginBottom: 18 }}>
                     <Icon size={20} style={{ color: feat.accent }} />
                   </div>
@@ -505,7 +544,7 @@ export default function LandingPage() {
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 36px', borderRadius: 16, fontWeight: 700, fontSize: 16, color: '#fff', textDecoration: 'none', background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', boxShadow: '0 8px 40px rgba(29,78,216,0.4)', transition: 'all 0.3s' }}
                   onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-2px)'; e.currentTarget.style.boxShadow = '0 16px 56px rgba(29,78,216,0.55)' }}
                   onMouseLeave={e => { e.currentTarget.style.transform = 'none'; e.currentTarget.style.boxShadow = '0 8px 40px rgba(29,78,216,0.4)' }}>
-                  Crear cuenta gratis <ArrowRight size={16} />
+                  Registrarse <ArrowRight size={16} />
                 </Link>
                 <Link to="/login"
                   style={{ display: 'inline-flex', alignItems: 'center', gap: 8, padding: '16px 28px', borderRadius: 16, fontWeight: 600, fontSize: 16, color: 'rgba(255,255,255,0.6)', textDecoration: 'none', border: '1px solid rgba(255,255,255,0.1)', background: 'rgba(255,255,255,0.04)', transition: 'all 0.3s' }}
@@ -523,7 +562,7 @@ export default function LandingPage() {
       <footer style={{ borderTop: '1px solid rgba(255,255,255,0.06)', padding: '28px 24px' }}>
         <div style={{ maxWidth: 1200, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: 16 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <img src="/Ctg_Seg-Logo.png" alt="Logo" style={{ width: 20, height: 20, objectFit: 'contain', opacity: 0.6 }} />
+            <img src="/logo-full.png" alt="Logo" style={{ width: 20, height: 20, objectFit: 'contain', opacity: 0.6 }} />
             <span style={{ fontSize: 13, color: 'rgba(255,255,255,0.25)' }}>Cartagena Segura © 2026</span>
           </div>
           <div style={{ display: 'flex', gap: 24 }}>

@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from 'react'
 import { Bell, X, Check, CheckCheck, Trash2, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { notificationService } from '@/services/services'
+import useAuthStore from '@/store/authStore'
 import toast from 'react-hot-toast'
 
 const TYPE_ICON = {
@@ -17,10 +19,16 @@ export default function NotificationPanel() {
   const [unread, setUnread]   = useState(0)
   const [loading, setLoading] = useState(false)
   const panelRef              = useRef(null)
+  const navigate              = useNavigate()
+  const { isAdmin }           = useAuthStore()
 
   useEffect(() => {
     notificationService.countUnread()
-      .then(r => setUnread(r.data?.data ?? 0))
+      .then(r => {
+        // Tu backend devuelve ApiResponse con el número en .data
+        const count = r.data?.data ?? 0
+        setUnread(Number(count))
+      })
       .catch(() => {})
   }, [])
 
@@ -64,6 +72,27 @@ export default function NotificationPanel() {
       setNotifs(n => n.filter(x => x.id !== id))
       if (wasUnread) setUnread(u => Math.max(0, u - 1))
     } catch {}
+  }
+
+  const handleNotifClick = (n) => {
+    console.log("Notificación tocada:", n)
+    
+    // Intentamos marcar como leída, pero no bloqueamos la navegación si falla (ej. por el 403)
+    if (!n.read) markRead(n.id)
+    
+    setOpen(false)
+
+    // Buscamos el ID del incidente en los campos posibles (Segun tu backend es relatedEntityId)
+    const incId = n.relatedEntityId || n.entityId || n.incidentId || n.targetId || n.referenceId || n.objectId
+    console.log("ID del incidente detectado:", incId)
+
+    if (!incId) {
+      console.warn("No se encontró un ID de incidente en la notificación. Verifica los campos en la consola arriba.")
+      return
+    }
+
+    const path = isAdmin() ? '/admin/incidents' : '/app/incidents'
+    navigate(`${path}?id=${incId}`)
   }
 
   return (
@@ -124,7 +153,8 @@ export default function NotificationPanel() {
               </div>
             ) : notifs.map((n, i) => (
               <div key={n.id} className="notif-row"
-                style={{ display: 'flex', gap: 12, padding: '12px 14px', borderBottom: i < notifs.length - 1 ? '1px solid #F8FAFC' : 'none', background: !n.read ? 'rgba(29,78,216,0.03)' : '#fff', cursor: 'default' }}>
+                onClick={() => handleNotifClick(n)}
+                style={{ display: 'flex', gap: 12, padding: '12px 14px', borderBottom: i < notifs.length - 1 ? '1px solid #F8FAFC' : 'none', background: !n.read ? 'rgba(29,78,216,0.03)' : '#fff', cursor: 'pointer' }}>
                 <div style={{ width: 36, height: 36, borderRadius: 12, background: !n.read ? 'rgba(29,78,216,0.08)' : '#F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 16, flexShrink: 0 }}>
                   {TYPE_ICON[n.type] ?? '🔔'}
                 </div>
@@ -140,7 +170,7 @@ export default function NotificationPanel() {
                     </p>
                   )}
                 </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 4, flexShrink: 0 }} onClick={e => e.stopPropagation()}>
                   {!n.read && (
                     <button onClick={() => markRead(n.id)}
                       style={{ width: 24, height: 24, borderRadius: 7, border: 'none', background: 'rgba(29,78,216,0.08)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>

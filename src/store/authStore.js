@@ -19,7 +19,11 @@ const useAuthStore = create((set) => ({
   isAuthenticated: () => !!localStorage.getItem('token'),
   isAdmin: () => {
     const user = JSON.parse(localStorage.getItem('user') || 'null')
-    return user?.roles?.includes('ROLE_ADMIN') ?? false
+    const roles = user?.roles || []
+    return roles.some(r => {
+      const name = typeof r === 'string' ? r : r?.name
+      return name === 'ADMIN' || name === 'ROLE_ADMIN'
+    })
   },
 }))
 

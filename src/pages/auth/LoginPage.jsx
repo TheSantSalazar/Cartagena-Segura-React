@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate, Link } from 'react-router-dom'
 import { useForm } from 'react-hook-form'
 import { Eye, EyeOff, Loader2 } from 'lucide-react'
@@ -13,34 +13,65 @@ export default function LoginPage() {
   const { login } = useAuthStore()
   const { register, handleSubmit, formState: { errors } } = useForm()
 
+  // Redirigir si ya está autenticado
+  useEffect(() => {
+    if (useAuthStore.getState().token) {
+      const roles = useAuthStore.getState().user?.roles || []
+      const isAdm = roles.some(r => {
+        const name = typeof r === 'string' ? r : r?.name
+        return name === 'ADMIN' || name === 'ROLE_ADMIN'
+      })
+      navigate(isAdm ? '/admin' : '/app', { replace: true })
+    }
+  }, [navigate])
+
   const onSubmit = async (data) => {
     setLoading(true)
     try {
       const res = await authService.login(data)
-      const { token, username, roles, fullName, email, phone } = res.data.data
+      // Extraemos los datos: soportamos tanto res.data.data como res.data directamente
+      const rawData = res.data?.data ?? res.data
+      
+      if (!rawData || !rawData.token) {
+        console.error('[Login Error]: Estructura de respuesta no reconocida', res.data)
+        throw new Error('La respuesta del servidor no contiene los datos esperados.')
+      }
+
+      const { token, username, roles, fullName, email, phone } = rawData
       login({ username, roles, fullName, email, phone }, token)
       toast.success(`¡Bienvenido, ${username}!`)
-      navigate(roles?.includes('ROLE_ADMIN') ? '/admin' : '/app')
+      
+      const rolesArr = Array.isArray(roles) ? roles : []
+      const isAdm = rolesArr.some(r => {
+        const name = typeof r === 'string' ? r : r?.name
+        return name === 'ADMIN' || name === 'ROLE_ADMIN'
+      })
+      
+      // Usamos replace: true para que no se pueda volver atrás al login
+      navigate(isAdm ? '/admin' : '/app', { replace: true })
     } catch (err) {
+      console.error('[Login Debug Info]:', err)
       const status = err?.response?.status
+      const msg = err?.response?.data?.message || err.message
+      
       if (status === 401 || status === 403) {
         toast.error('Credenciales incorrectas. Verifica tu usuario y contraseña.')
       } else if (status === 500) {
         toast.error('Error del servidor. Intenta más tarde.')
       } else {
-        toast.error('Error al iniciar sesión. Intenta de nuevo.')
+        toast.error(`Error: ${msg}`)
       }
     } finally { setLoading(false) }
   }
 
   return (
     <div className="min-h-screen flex items-center justify-center p-4 relative"
-      style={{ backgroundImage: 'url(/login_bg.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
+      style={{ backgroundImage: 'url(/bg-auth.png)', backgroundSize: 'cover', backgroundPosition: 'center' }}>
       <div className="absolute inset-0 bg-black/60" />
       <div className="relative w-full max-w-sm sm:max-w-md animate-slide-up">
         <div className="text-center mb-6 sm:mb-8">
           <div className="inline-flex items-center justify-center w-16 h-16 sm:w-20 sm:h-20 bg-white/10 border border-white/20 rounded-2xl mb-4 backdrop-blur">
-            <img src="/Ctg_Seg-Logo.png" alt="Cartagena Segura" className="w-10 h-10 sm:w-14 sm:h-14 object-contain" />
+            <img src="/logo-full.png" alt="Cartagena Segura" className="w-10 h-10 sm:w-14 sm:h-14 object-contain" />
           </div>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">Cartagena Segura</h1>
           <p className="text-white/60 text-xs sm:text-sm mt-1">Sistema de Seguridad Ciudadana</p>

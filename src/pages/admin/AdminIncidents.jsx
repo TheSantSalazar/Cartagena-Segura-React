@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { incidentService } from '@/services/services'
 import { Loader2, AlertTriangle, MapPin, X, Image, FileText, Calendar, User, Zap, Search } from 'lucide-react'
 import toast from 'react-hot-toast'
@@ -32,6 +33,22 @@ export default function AdminIncidents() {
       .finally(() => setLoading(false))
   }
   useEffect(() => { load() }, [])
+
+  /* ── URL Params Handle ── */
+  const [searchParams] = useSearchParams()
+  useEffect(() => {
+    const id = searchParams.get('id')
+    if (id) {
+      const found = incidents.find(x => String(x.id) === String(id))
+      if (found) {
+        openModal(found)
+      } else if (!loading && incidents.length > 0) {
+        incidentService.getById(id)
+          .then(res => openModal(res.data?.data ?? res.data))
+          .catch(() => {})
+      }
+    }
+  }, [searchParams, incidents, loading])
 
   const openModal = inc => { setSelected(inc); setForm({ status: inc.status, priority: inc.priority, assignedTo: inc.assignedTo ?? '', changeReason: '' }) }
 
