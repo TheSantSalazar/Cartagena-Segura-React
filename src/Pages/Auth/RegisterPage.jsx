@@ -17,16 +17,23 @@ export default function RegisterPage() {
       toast.success('¡Registro exitoso! Ya puedes iniciar sesión')
       navigate('/login')
     } catch (err) {
-      console.error('[Register Error]:', err)
       const status = err?.response?.status
-      const msg = err?.response?.data?.message || err.message
+      const message = err?.response?.data?.message || ''
+      const lowerMessage = message.toLowerCase()
       
-      if (status === 409 || (status === 403 && msg.includes('Access Denied'))) {
-        toast.error('El usuario o correo ya está registrado en el sistema.')
-      } else if (status === 400) {
-        toast.error('Hay un error en los datos ingresados. Revisa el formulario.')
+      // Coincidimos exactamente con las Excepciones arrojadas en AuthService.java
+      if ((status === 400 || status === 403) && lowerMessage.includes('username')) {
+        toast.error('El nombre de usuario ya está en uso.')
+      } else if ((status === 400 || status === 403) && lowerMessage.includes('email')) {
+        toast.error('El correo electrónico ya está en uso.')
+      } else if ((status === 400 || status === 403) && lowerMessage.includes('telefono')) {
+        toast.error('El teléfono ya está en uso.')
+      } else if (status === 403 || status === 401) {
+        toast.error('No autorizado. Intenta de nuevo.')
+      } else if (status === 500) {
+        toast.error('Error del servidor. Intenta más tarde.')
       } else {
-        toast.error(`Algo salió mal: ${msg}`)
+        toast.error('Error al crear la cuenta. Intenta de nuevo.')
       }
     } finally { setLoading(false) }
   }

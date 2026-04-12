@@ -2,8 +2,8 @@ import api from './Api'
 
 // ── AUTH ──────────────────────────────────────────────────────────────────
 export const authService = {
-  login:    (data) => api.post('/Auth/login', data),
-  register: (data) => api.post('/Auth/register', data),
+  login:    (data) => api.post('/auth/login', data),
+  register: (data) => api.post('/auth/register', data),
 }
 
 // ── INCIDENTS ─────────────────────────────────────────────────────────────
