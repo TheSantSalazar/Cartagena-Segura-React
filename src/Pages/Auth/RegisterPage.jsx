@@ -58,11 +58,13 @@ export default function RegisterPage() {
                 <label className="block text-sm font-medium text-white/80 mb-1.5">Usuario</label>
                 <input className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all duration-200"
                   placeholder="usuario123"
+                  autoCapitalize="none"
+                  autoCorrect="off"
                   {...register('username', { required: 'Requerido' })} />
                 {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username.message}</p>}
               </div>
               <div>
-                <label className="block text-sm font-medium text-white/80 mb-1.5">Nombre completo</label>
+                <label className="block text-sm font-medium text-white/80 mb-1.5">Nombre Completo</label>
                 <input className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all duration-200"
                   placeholder="Tu nombre"
                   {...register('fullName', { required: 'Requerido' })} />
@@ -77,7 +79,7 @@ export default function RegisterPage() {
               {errors.email && <p className="text-red-400 text-xs mt-1">{errors.email.message}</p>}
             </div>
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-1.5">Teléfono (opcional)</label>
+              <label className="block text-sm font-medium text-white/80 mb-1.5">Teléfono</label>
               <input className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all duration-200"
                 placeholder="+57 300 000 0000"
                 {...register('phone')} />

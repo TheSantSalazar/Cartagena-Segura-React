@@ -80,9 +80,11 @@ export default function LoginPage() {
           <h2 className="text-lg sm:text-xl font-bold text-white mb-5 sm:mb-6">Iniciar Sesión</h2>
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-white/80 mb-1.5">Usuario, correo o teléfono</label>
+              <label className="block text-sm font-medium text-white/80 mb-1.5">Usuario, Correo o Teléfono</label>
               <input className="w-full px-4 py-2.5 bg-white/10 border border-white/20 rounded-xl text-sm text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-white/30 focus:border-transparent transition-all duration-200"
                 placeholder="usuario / correo@email.com / 300..."
+                autoCapitalize="none"
+                autoCorrect="off"
                 {...register('username', { required: 'Campo requerido' })} />
               {errors.username && <p className="text-red-400 text-xs mt-1">{errors.username.message}</p>}
             </div>
