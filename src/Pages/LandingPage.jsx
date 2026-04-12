@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
-  AlertTriangle, ArrowRight, Bell, CheckCircle2, Clock3,
+  AlertTriangle, ArrowRight, Bell, CheckCircle2,
   Lock, Map, Phone, ShieldCheck, Sparkles, Users, ChevronDown,
   Zap, Eye, Globe, TrendingUp
 } from 'lucide-react'
@@ -37,12 +37,12 @@ function useCountUp(target, active, duration = 1800) {
 
 /* ── Data ─────────────────────────────────────────────────────────────── */
 const features = [
-  { icon: AlertTriangle, title: 'Reportes inteligentes', desc: 'Geolocalización GPS, evidencia multimedia y clasificación automática por IA para respuestas más rápidas.', accent: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
-  { icon: Map, title: 'Mapa operativo en vivo', desc: 'Visualiza incidentes activos, zonas de riesgo y tendencias en tiempo real sobre el territorio.', accent: '#3B82F6', bg: 'rgba(59,130,246,0.08)' },
-  { icon: Phone, title: 'Canal de emergencia', desc: 'Contactos clave y protocolos de acción inmediata accesibles desde cualquier dispositivo.', accent: '#EF4444', bg: 'rgba(239,68,68,0.08)' },
-  { icon: Bell, title: 'Alertas y seguimiento', desc: 'Notificaciones en tiempo real sobre el estado de tus reportes y alertas de tu zona.', accent: '#8B5CF6', bg: 'rgba(139,92,246,0.08)' },
-  { icon: Sparkles, title: 'IA clasificadora', desc: 'Inteligencia artificial que analiza y categoriza incidentes automáticamente para priorizar respuestas.', accent: '#06B6D4', bg: 'rgba(6,182,212,0.08)' },
-  { icon: Lock, title: 'Privacidad garantizada', desc: 'Autenticación segura JWT y cifrado de extremo a extremo para proteger la identidad ciudadana.', accent: '#10B981', bg: 'rgba(16,185,129,0.08)' },
+  { icon: AlertTriangle, title: 'Reporte de incidentes', desc: 'Informa sobre robos, accidentes o vandalismo en segundos con geolocalización precisa.', accent: '#F59E0B', bg: 'rgba(245,158,11,0.08)' },
+  { icon: Map, title: 'Mapa de calor', desc: 'Visualiza las zonas con mayor actividad de incidentes para tomar decisiones informadas.', accent: '#3B82F6', bg: 'rgba(59,130,246,0.08)' },
+  { icon: Bell, title: 'Alertas en tiempo real', desc: 'Recibe notificaciones inmediatas sobre situaciones de riesgo en tu ubicación actual.', accent: '#EF4444', bg: 'rgba(239,68,68,0.08)' },
+  { icon: ShieldCheck, title: 'Gestión de casos', desc: 'Seguimiento detallado desde el reporte hasta la resolución por parte de las autoridades.', accent: '#8B5CF6', bg: 'rgba(139,92,246,0.08)' },
+  { icon: Sparkles, title: 'Inteligencia artificial', desc: 'Análisis predictivo y clasificación automática de reportes para priorizar emergencias.', accent: '#06B6D4', bg: 'rgba(6,182,212,0.08)' },
+  { icon: Users, title: 'Participación ciudadana', desc: 'Conecta a la comunidad con los entes de control para una Cartagena más segura.', accent: '#10B981', bg: 'rgba(16,185,129,0.08)' },
 ]
 
 const journey = [
@@ -164,7 +164,6 @@ export default function LandingPage() {
 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 relative w-full">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Left side: Original Content */}
             <div className="flex flex-col gap-6 sm:gap-8 animate-[heroReveal_0.8s_ease-out]">
               <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 border border-blue-500/20 w-fit">
                 <Zap size={14} className="text-blue-400" />
@@ -179,7 +178,7 @@ export default function LandingPage() {
               </h1>
               
               <p className="text-lg sm:text-xl text-white/45 leading-relaxed max-w-lg">
-                Centraliza reportes, monitoreo y comunicación entre ciudadanía y autoridades en una sola experiencia de nivel profesional.
+                Centraliza reportes, monitoreo y comunicación entre ciudadanía y autoridades para una respuesta inmediata y eficiente.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-4 mt-2">
@@ -191,7 +190,6 @@ export default function LandingPage() {
                 </Link>
               </div>
 
-              {/* Trust badges: Original */}
               <div className="flex items-center gap-6 mt-4 pt-6 border-t border-white/10">
                 {[['🔒', 'Datos seguros'], ['⚡', 'Tiempo real'], ['📍', 'GPS preciso']].map(([icon, label]) => (
                   <div key={label} className="flex items-center gap-2">
@@ -202,14 +200,12 @@ export default function LandingPage() {
               </div>
             </div>
 
-            {/* Right side: Original Dashboard Mockup (Responsive) */}
             <div className="relative hidden lg:block animate-[heroReveal_1s_ease-out]">
               <div style={{ position: 'absolute', inset: -40, background: 'url(/RegisterBg.png)', backgroundSize: 'cover', opacity: 0.15, filter: 'blur(40px)' }} />
               
               <div className="relative p-6 rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl overflow-hidden">
                 <div className="scan-line" />
                 
-                {/* Mockup Header */}
                 <div className="flex justify-between items-center mb-6">
                   <div>
                     <p className="text-[10px] uppercase tracking-widest text-white/40 mb-1">Panel de control</p>
@@ -222,7 +218,6 @@ export default function LandingPage() {
                   </div>
                 </div>
 
-                {/* Mockup Stats */}
                 <div className="grid grid-cols-3 gap-3 mb-6">
                   {[
                     { n: '24', label: 'Activos', color: '#F59E0B' },
@@ -236,7 +231,6 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                {/* Mockup Feed */}
                 <div className="space-y-3">
                   {[
                     { type: 'ROBO', loc: 'Getsemaní', time: 'hace 2 min', color: '#EF4444', status: 'CRÍTICO' },
@@ -255,14 +249,12 @@ export default function LandingPage() {
                   ))}
                 </div>
 
-                {/* Mockup AI Badge */}
                 <div className="mt-5 p-3 rounded-xl bg-gradient-to-r from-violet-500/10 to-cyan-500/5 border border-violet-500/20 flex items-center gap-3">
                   <Sparkles size={14} className="text-violet-400" />
                   <span className="text-[11px] text-white/60">IA clasificó <strong className="text-violet-400">3 incidentes</strong> automáticamente</span>
                 </div>
               </div>
 
-              {/* Floating Badge */}
               <div className="absolute -bottom-6 -left-6 p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 backdrop-blur-xl flex items-center gap-3 animate-[floatA_4s_infinite]">
                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
                  <div>
