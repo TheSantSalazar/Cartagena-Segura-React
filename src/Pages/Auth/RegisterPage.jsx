@@ -21,12 +21,12 @@ export default function RegisterPage() {
       const status = err?.response?.status
       const msg = err?.response?.data?.message || err.message
       
-      if (status === 409) {
-        toast.error('El usuario o correo ya existe. Intenta con otros datos.')
+      if (status === 409 || (status === 403 && msg.includes('Access Denied'))) {
+        toast.error('El usuario o correo ya está registrado en el sistema.')
       } else if (status === 400) {
-        toast.error('Los datos enviados no son válidos. Revisa el formulario.')
+        toast.error('Hay un error en los datos ingresados. Revisa el formulario.')
       } else {
-        toast.error(`Error al registrar: ${msg}`)
+        toast.error(`Algo salió mal: ${msg}`)
       }
     } finally { setLoading(false) }
   }
