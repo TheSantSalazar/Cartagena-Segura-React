@@ -17,7 +17,17 @@ export default function RegisterPage() {
       toast.success('¡Registro exitoso! Ya puedes iniciar sesión')
       navigate('/login')
     } catch (err) {
-// ... (mismo manejo de errores)
+      console.error('[Register Error]:', err)
+      const status = err?.response?.status
+      const msg = err?.response?.data?.message || err.message
+      
+      if (status === 409) {
+        toast.error('El usuario o correo ya existe. Intenta con otros datos.')
+      } else if (status === 400) {
+        toast.error('Los datos enviados no son válidos. Revisa el formulario.')
+      } else {
+        toast.error(`Error al registrar: ${msg}`)
+      }
     } finally { setLoading(false) }
   }
 
