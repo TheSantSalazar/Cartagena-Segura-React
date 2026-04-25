@@ -551,7 +551,7 @@ export default function CitizenIncidents() {
                     <div style={{ borderRadius: 16, border: '1px solid #E2E8F0', padding: 14, background: '#F8FAFC' }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
                         <MapPin size={14} style={{ color: '#3B82F6' }} />
-                        <span style={{ fontSize: 12, fontWeight: 700, color: '#0F172A' }}>Ubicación del incidente</span>
+                        <span style={{ fontSize: 12, fontWeight: 700, color: '#0F172A' }}>Ubicación / Punto de Referencia *</span>
                       </div>
                       <button type="button" onClick={detectGPS} disabled={gpsLoading}
                         style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, padding: '11px', borderRadius: 12, background: gpsLoading ? '#E2E8F0' : 'linear-gradient(135deg, #1D4ED8, #3B82F6)', color: gpsLoading ? '#94A3B8' : '#fff', fontWeight: 700, fontSize: 13, border: 'none', cursor: gpsLoading ? 'not-allowed' : 'pointer', marginBottom: 12, fontFamily: 'inherit', transition: 'all 0.2s' }}>
@@ -571,11 +571,11 @@ export default function CitizenIncidents() {
 
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
                         <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
-                        <span style={{ fontSize: 11, color: '#CBD5E1' }}>o escribe la dirección</span>
+                        <span style={{ fontSize: 11, color: '#CBD5E1' }}>o describe el punto de referencia</span>
                         <div style={{ flex: 1, height: 1, background: '#E2E8F0' }} />
                       </div>
 
-                      <input className="text-input" value={form.location}
+                      <input className="text-input" required value={form.location}
                         onChange={e => setForm({...form, location: e.target.value})}
                         placeholder="Ej: Carrera 3 con Calle 10, Getsemaní" />
                     </div>
