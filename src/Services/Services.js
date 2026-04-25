@@ -16,8 +16,11 @@ export const incidentService = {
   updateStatus: (id, d)  => api.patch(`/incidents/${id}/status`, d),
   delete:       (id)     => api.delete(`/incidents/${id}`),
   getHistory:   (id)     => api.get(`/incidents/${id}/history`),
-  getComments:  (id)     => api.get(`/incidents/${id}/comments`),
-  addComment:   (id, d)  => api.post(`/incidents/${id}/comments`, d),
+  getComments:     (id)              => api.get(`/incidents/${id}/comments`),
+  getAllComments:   (id)              => api.get(`/incidents/${id}/comments/all`),
+  addComment:      (id, d)           => api.post(`/incidents/${id}/comments`, d),
+  updateComment:   (id, cId, content) => api.put(`/incidents/${id}/comments/${cId}`, null, { params: { content } }),
+  deleteComment:   (id, cId)         => api.delete(`/incidents/${id}/comments/${cId}`),
 
   uploadFiles: (files) => {
     const fd = new FormData()

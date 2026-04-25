@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import CommentsSection from '@/Components/CommentsSection'
 import { useSearchParams } from 'react-router-dom'
 import { incidentService } from '@/Services/Services'
 import { Loader2, AlertTriangle, MapPin, X, Image, FileText, Calendar, User, Zap, Search } from 'lucide-react'
@@ -225,6 +226,9 @@ export default function AdminIncidents() {
                   </div>
                 </div>
               )}
+
+              {/* Comentarios */}
+              <CommentsSection incidentId={selected.id} isAdmin />
 
               {/* Update form */}
               <div style={{ borderTop: '1px solid #F1F5F9', paddingTop: 16 }}>

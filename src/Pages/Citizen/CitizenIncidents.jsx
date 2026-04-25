@@ -1,4 +1,5 @@
 import { useEffect, useState, useRef, useCallback } from 'react'
+import CommentsSection from '@/Components/CommentsSection'
 import { useSearchParams } from 'react-router-dom'
 import { incidentService, aiService } from '@/Services/Services'
 import {
@@ -155,6 +156,9 @@ function IncidentDetailModal({ inc, onClose }) {
               <p style={{ fontSize: 12, color: '#CBD5E1' }}>Sin archivos adjuntos</p>
             </div>
           )}
+
+          {/* Comentarios */}
+          <CommentsSection incidentId={inc.id} />
         </div>
       </div>
     </div>
