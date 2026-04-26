@@ -24,7 +24,7 @@ api.interceptors.response.use(
     const url = err.config?.url || ''
 
     // Rutas de auth — dejar que cada página maneje sus propios errores
-    if (url.includes('/auth/')) return Promise.reject(err)
+    if (url.includes('/Auth/')) return Promise.reject(err)
 
     if (status === 401) {
       localStorage.removeItem('token')

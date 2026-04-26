@@ -2,30 +2,30 @@ import api from './Api'
 
 // ── AUTH ──────────────────────────────────────────────────────────────────
 export const authService = {
-  login:    (data) => api.post('/auth/login', data),
-  register: (data) => api.post('/auth/register', data),
+  login:    (data) => api.post('/Auth/Login', data),
+  register: (data) => api.post('/Auth/Register', data),
 }
 
 // ── INCIDENTS ─────────────────────────────────────────────────────────────
 export const incidentService = {
-  getAll:       (params) => api.get('/incidents', { params }),
-  getById:      (id)     => api.get(`/incidents/${id}`),
-  getMine:      ()       => api.get('/incidents/my'),
-  create:       (data)   => api.post('/incidents', data),
-  update:       (id, d)  => api.put(`/incidents/${id}`, d),
-  updateStatus: (id, d)  => api.patch(`/incidents/${id}/status`, d),
-  delete:       (id)     => api.delete(`/incidents/${id}`),
-  getHistory:   (id)     => api.get(`/incidents/${id}/history`),
-  getComments:     (id)              => api.get(`/incidents/${id}/comments`),
-  getAllComments:   (id)              => api.get(`/incidents/${id}/comments/all`),
-  addComment:      (id, d)           => api.post(`/incidents/${id}/comments`, d),
-  updateComment:   (id, cId, content) => api.put(`/incidents/${id}/comments/${cId}`, null, { params: { content } }),
-  deleteComment:   (id, cId)         => api.delete(`/incidents/${id}/comments/${cId}`),
+  getAll:       (params) => api.get('/Incidents', { params }),
+  getById:      (id)     => api.get(`/Incidents/${id}`),
+  getMine:      ()       => api.get('/Incidents/My'),
+  create:       (data)   => api.post('/Incidents', data),
+  update:       (id, d)  => api.put(`/Incidents/${id}`, d),
+  updateStatus: (id, d)  => api.patch(`/Incidents/${id}/Status`, d),
+  delete:       (id)     => api.delete(`/Incidents/${id}`),
+  getHistory:   (id)     => api.get(`/Incidents/${id}/History`),
+  getComments:     (id)              => api.get(`/Incidents/${id}/Comments`),
+  getAllComments:   (id)              => api.get(`/Incidents/${id}/Comments/All`),
+  addComment:      (id, d)           => api.post(`/Incidents/${id}/Comments`, d),
+  updateComment:   (id, cId, content) => api.put(`/Incidents/${id}/Comments/${cId}`, null, { params: { content } }),
+  deleteComment:   (id, cId)         => api.delete(`/Incidents/${id}/Comments/${cId}`),
 
   uploadFiles: (files) => {
     const fd = new FormData()
     files.forEach(f => fd.append('files', f))
-    return api.post('/files/upload', fd, {
+    return api.post('/Files/Upload', fd, {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
@@ -33,47 +33,47 @@ export const incidentService = {
 
 // ── ZONES ─────────────────────────────────────────────────────────────────
 export const zoneService = {
-  getAll:     ()       => api.get('/zones'),
-  getById:    (id)     => api.get(`/zones/${id}`),
-  create:     (data)   => api.post('/zones', data),
-  update:     (id, d)  => api.put(`/zones/${id}`, d),
-  updateRisk: (id, d)  => api.patch(`/zones/${id}/risk`, d),
-  delete:     (id)     => api.delete(`/zones/${id}`),
+  getAll:     ()       => api.get('/Zones'),
+  getById:    (id)     => api.get(`/Zones/${id}`),
+  create:     (data)   => api.post('/Zones', data),
+  update:     (id, d)  => api.put(`/Zones/${id}`, d),
+  updateRisk: (id, d)  => api.patch(`/Zones/${id}/Risk`, d),
+  delete:     (id)     => api.delete(`/Zones/${id}`),
 }
 
 // ── NOTIFICATIONS ─────────────────────────────────────────────────────────
 export const notificationService = {
-  getAll:        ()   => api.get('/notifications'),
-  getUnread:     ()   => api.get('/notifications/unread'),
-  countUnread:   ()   => api.get('/notifications/unread/count'),
-  markAsRead:    (id) => api.patch(`/notifications/${id}/read`),
-  markAllAsRead: ()   => api.patch('/notifications/read-all'),
-  delete:        (id) => api.delete(`/notifications/${id}`),
+  getAll:        ()   => api.get('/Notifications'),
+  getUnread:     ()   => api.get('/Notifications/Unread'),
+  countUnread:   ()   => api.get('/Notifications/Unread/Count'),
+  markAsRead:    (id) => api.patch(`/Notifications/${id}/Read`),
+  markAllAsRead: ()   => api.patch('/Notifications/ReadAll'),
+  delete:        (id) => api.delete(`/Notifications/${id}`),
 }
 
 // ── EMERGENCY CONTACTS ────────────────────────────────────────────────────
 export const emergencyService = {
-  getAll:  ()       => api.get('/emergency-contacts'),
-  create:  (data)   => api.post('/emergency-contacts', data),
-  update:  (id, d)  => api.put(`/emergency-contacts/${id}`, d),
-  delete:  (id)     => api.delete(`/emergency-contacts/${id}`),
+  getAll:  ()       => api.get('/EmergencyContacts'),
+  create:  (data)   => api.post('/EmergencyContacts', data),
+  update:  (id, d)  => api.put(`/EmergencyContacts/${id}`, d),
+  delete:  (id)     => api.delete(`/EmergencyContacts/${id}`),
 }
 
 // ── LOGS ──────────────────────────────────────────────────────────────────
 export const logService = {
-  getAll: (params) => api.get('/logs', { params }),
+  getAll: (params) => api.get('/Logs', { params }),
 }
 
 // ── REPORTS ───────────────────────────────────────────────────────────────
 export const reportService = {
-  getAll:   (params) => api.get('/reports', { params }),
-  generate: (data)   => api.post('/reports', data),
+  getAll:   (params) => api.get('/Reports', { params }),
+  generate: (data)   => api.post('/Reports', data),
 }
 
 // ── AI (GROQ) ─────────────────────────────────────────────────────────────
 export const aiService = {
-  chat:          (data) => api.post('/ai/chat', data),
-  classify:      (data) => api.post('/ai/classify', data),
-  summary:       ()     => api.get('/ai/summary'),
-  zonesAnalysis: ()     => api.get('/ai/zones/analysis'),
+  chat:          (data) => api.post('/Ai/Chat', data),
+  classify:      (data) => api.post('/Ai/Classify', data),
+  summary:       ()     => api.get('/Ai/Summary'),
+  zonesAnalysis: ()     => api.get('/Ai/Zones/Analysis'),
 }
