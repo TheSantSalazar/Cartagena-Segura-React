@@ -236,12 +236,12 @@ export default function LandingPage() {
             </div>
 
             <div className="relative hidden lg:block animate-[heroReveal_1s_ease-out]">
-              <div style={{ position: 'absolute', inset: -40, background: 'url(/assets/Hero.png)', backgroundSize: 'cover', opacity: 0.15, filter: 'blur(40px)' }} />
+              <div style={{ position: 'absolute', inset: -40, background: 'url(/Assets/Hero.png)', backgroundSize: 'cover', opacity: 0.15, filter: 'blur(40px)' }} />
               
               <div className="relative p-3 rounded-[32px] border border-white/10 bg-white/5 backdrop-blur-2xl shadow-2xl overflow-hidden group">
                 <div className="scan-line" />
                 <img 
-                  src="/assets/Dashboard.png" 
+                  src="/Assets/Dashboard.png" 
                   alt="Dashboard Preview" 
                   className="w-full h-full object-cover rounded-[24px] opacity-80 group-hover:opacity-100 transition-opacity duration-500" 
                 />
@@ -355,7 +355,7 @@ export default function LandingPage() {
               <div className="relative aspect-video rounded-[32px] overflow-hidden border border-white/10 group">
                 <div className="absolute inset-0 bg-gradient-to-tr from-blue-600/20 to-transparent z-10" />
                 <img 
-                  src="/assets/Mission.png" 
+                  src="/Assets/Mission.png" 
                   alt="Cartagena" 
                   className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-all duration-700 scale-110 group-hover:scale-100" 
                 />
