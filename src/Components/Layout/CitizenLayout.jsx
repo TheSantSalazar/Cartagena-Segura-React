@@ -5,11 +5,11 @@ import NotificationPanel from '@/Components/NotificationPanel'
 import AIChatbot from '@/Components/AIChatbot'
 
 const navItems = [
-  { to: '/app',           icon: Home,          label: 'Inicio',     end: true  },
-  { to: '/app/incidents', icon: AlertTriangle, label: 'Reportes'              },
-  { to: '/app/map',       icon: Map,           label: 'Mapa'                  },
-  { to: '/app/emergency', icon: Phone,         label: 'Emergencias'           },
-  { to: '/app/analytics', icon: BarChart2,     label: 'Análisis'              },
+  { to: '/App',           icon: Home,          label: 'Inicio',     end: true  },
+  { to: '/App/Incidents', icon: AlertTriangle, label: 'Reportes'              },
+  { to: '/App/Map',       icon: Map,           label: 'Mapa'                  },
+  { to: '/App/Emergency', icon: Phone,         label: 'Emergencias'           },
+  { to: '/App/Analytics', icon: BarChart2,     label: 'Análisis'              },
 ]
 
 export default function CitizenLayout() {
@@ -48,7 +48,7 @@ export default function CitizenLayout() {
 
         <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
           <NotificationPanel />
-          <Link to="/app/profile" className="top-avatar" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '4px 8px 4px 4px', borderRadius: 100, border: '1px solid #F1F5F9', background: '#F8FAFC' }}>
+          <Link to="/App/Profile" className="top-avatar" style={{ display: 'flex', alignItems: 'center', gap: 8, textDecoration: 'none', padding: '4px 8px 4px 4px', borderRadius: 100, border: '1px solid #F1F5F9', background: '#F8FAFC' }}>
             <div style={{ width: 28, height: 28, borderRadius: '50%', background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 12, fontWeight: 800, color: '#fff' }}>
               {initial}
             </div>

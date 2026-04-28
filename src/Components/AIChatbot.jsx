@@ -93,7 +93,7 @@ export default function AIChatbot() {
       {/* FAB */}
       {!open && (
         <button onClick={() => setOpen(true)}
-          style={{ position: 'fixed', bottom: 80, right: 16, zIndex: 200, width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(29,78,216,0.4)', fontFamily: 'inherit' }}
+          style={{ position: 'fixed', bottom: 80, right: 16, zIndex: 2000, width: 52, height: 52, borderRadius: 16, background: 'linear-gradient(135deg, #1D4ED8, #3B82F6)', border: 'none', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', boxShadow: '0 8px 32px rgba(29,78,216,0.4)', fontFamily: 'inherit' }}
           className="animate-glow-pulse sm:bottom-6 sm:right-6">
           <MessageCircle size={22} style={{ color: '#fff' }} />
           <span style={{ position: 'absolute', top: -3, right: -3, width: 14, height: 14, borderRadius: '50%', background: '#34D399', border: '2px solid #fff' }} />
@@ -102,7 +102,7 @@ export default function AIChatbot() {
 
       {/* Drawer */}
       {open && (
-        <div style={{ position: 'fixed', inset: 0, zIndex: 200, display: 'flex', justifyContent: 'flex-end', padding: '0' }}
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, display: 'flex', justifyContent: 'flex-end', padding: '0' }}
           onClick={e => e.target === e.currentTarget && setOpen(false)}>
           <div style={{ position: 'absolute', inset: 0, background: 'rgba(0,0,0,0.4)', backdropFilter: 'blur(4px)' }} onClick={() => setOpen(false)} />
 

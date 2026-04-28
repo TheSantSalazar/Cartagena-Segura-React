@@ -9,13 +9,13 @@ import NotificationPanel from '@/Components/NotificationPanel'
 
 
 const navItems = [
-  { to: '/admin',           icon: LayoutDashboard, label: 'Dashboard',    end: true  },
-  { to: '/Admin/incidents', icon: AlertTriangle,   label: 'Incidentes'               },
-  { to: '/Admin/zones',     icon: Map,             label: 'Zonas'                    },
-  { to: '/Admin/emergency', icon: Phone,           label: 'Emergencias'              },
-  { to: '/Admin/logs',      icon: FileText,        label: 'Logs'                     },
-  { to: '/Admin/reports',   icon: BarChart2,       label: 'Reportes'                 },
-  { to: '/Admin/ai',        icon: Sparkles,        label: 'Asistente Virtual',  special: true },
+  { to: '/Admin',           icon: LayoutDashboard, label: 'Dashboard',    end: true  },
+  { to: '/Admin/Incidents', icon: AlertTriangle,   label: 'Incidentes'               },
+  { to: '/Admin/Zones',     icon: Map,             label: 'Zonas'                    },
+  { to: '/Admin/Emergency', icon: Phone,           label: 'Emergencias'              },
+  { to: '/Admin/Logs',      icon: FileText,        label: 'Logs'                     },
+  { to: '/Admin/Reports',   icon: BarChart2,       label: 'Reportes'                 },
+  { to: '/Admin/Ai',        icon: Sparkles,        label: 'Asistente Virtual',  special: true },
 ]
 
 export default function AdminLayout() {

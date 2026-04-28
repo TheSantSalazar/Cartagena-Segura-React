@@ -91,7 +91,7 @@ export default function NotificationPanel() {
       return
     }
 
-    const path = isAdmin() ? '/Admin/incidents' : '/app/incidents'
+    const path = isAdmin() ? '/Admin/Incidents' : '/App/Incidents'
     navigate(`${path}?id=${incId}`)
   }
 

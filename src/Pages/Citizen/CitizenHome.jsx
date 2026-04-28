@@ -19,10 +19,10 @@ const PRIORITY_MAP = {
 }
 
 const quickLinks = [
-  { to: '/app/incidents', icon: AlertTriangle, label: 'Mis Reportes',  sub: 'Gestiona tus casos',    accent: '#F59E0B', bg: 'rgba(245,158,11,0.08)'  },
-  { to: '/app/map',       icon: Map,           label: 'Ver Mapa',      sub: 'Mapa en tiempo real',   accent: '#3B82F6', bg: 'rgba(59,130,246,0.08)'  },
-  { to: '/app/emergency', icon: Phone,         label: 'Emergencias',   sub: 'Contactos clave',       accent: '#EF4444', bg: 'rgba(239,68,68,0.08)'   },
-  { to: '/app/analytics', icon: BarChart2,     label: 'Estadísticas',  sub: 'Datos y métricas',      accent: '#8B5CF6', bg: 'rgba(139,92,246,0.08)'  },
+  { to: '/App/Incidents', icon: AlertTriangle, label: 'Mis Reportes',  sub: 'Gestiona tus casos',    accent: '#F59E0B', bg: 'rgba(245,158,11,0.08)'  },
+  { to: '/App/Map',       icon: Map,           label: 'Ver Mapa',      sub: 'Mapa en tiempo real',   accent: '#3B82F6', bg: 'rgba(59,130,246,0.08)'  },
+  { to: '/App/Emergency', icon: Phone,         label: 'Emergencias',   sub: 'Contactos clave',       accent: '#EF4444', bg: 'rgba(239,68,68,0.08)'   },
+  { to: '/App/Analytics', icon: BarChart2,     label: 'Estadísticas',  sub: 'Datos y métricas',      accent: '#8B5CF6', bg: 'rgba(139,92,246,0.08)'  },
 ]
 
 export default function CitizenHome() {
@@ -83,7 +83,7 @@ export default function CitizenHome() {
           <p style={{ fontSize: 13, color: 'rgba(255,255,255,0.4)' }}>Ciudadano activo · Cartagena Segura</p>
 
           {/* Quick CTA */}
-          <Link to="/app/incidents" style={{
+          <Link to="/App/Incidents" style={{
             display: 'inline-flex', alignItems: 'center', gap: 8, marginTop: 20,
             padding: '10px 20px', borderRadius: 12, fontWeight: 700, fontSize: 13,
             color: '#1D4ED8', background: '#fff', textDecoration: 'none',
@@ -129,7 +129,7 @@ export default function CitizenHome() {
         <div className="citizen-fade s4">
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
             <p style={{ fontSize: 11, color: '#94A3B8', fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Mis reportes recientes</p>
-            <Link to="/app/incidents" style={{ fontSize: 12, color: '#3B82F6', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Link to="/App/Incidents" style={{ fontSize: 12, color: '#3B82F6', fontWeight: 600, textDecoration: 'none', display: 'flex', alignItems: 'center', gap: 4 }}>
               Ver todos <ArrowRight size={12} />
             </Link>
           </div>
@@ -146,7 +146,7 @@ export default function CitizenHome() {
                 </div>
                 <p style={{ fontSize: 14, color: '#94A3B8', marginBottom: 4, fontWeight: 600 }}>Sin reportes aún</p>
                 <p style={{ fontSize: 12, color: '#CBD5E1', marginBottom: 16 }}>Sé el primero en reportar un incidente</p>
-                <Link to="/app/incidents" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, background: '#1D4ED8', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
+                <Link to="/App/Incidents" style={{ display: 'inline-flex', alignItems: 'center', gap: 6, padding: '9px 18px', borderRadius: 10, background: '#1D4ED8', color: '#fff', fontSize: 13, fontWeight: 600, textDecoration: 'none' }}>
                   <Plus size={13} /> Reportar ahora
                 </Link>
               </div>
