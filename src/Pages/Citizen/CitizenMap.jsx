@@ -169,7 +169,7 @@ export default function CitizenMap() {
         </button>
 
         {/* Stats overlay */}
-        <div style={{ position: 'absolute', top: 60, left: 12, zIndex: 1000, display: 'flex', gap: 6 }}>
+        <div style={{ position: 'absolute', top: 12, left: 52, zIndex: 1000, display: 'flex', gap: 6 }}>
           {Object.entries(PRIORITY_COLOR).map(([lvl, color]) => {
             const count = displayed.filter(i => i.priority === lvl).length
             if (!count) return null

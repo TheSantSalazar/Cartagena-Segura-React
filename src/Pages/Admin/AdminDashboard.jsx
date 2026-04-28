@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react'
-import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
+import { MapContainer, TileLayer, Marker, Popup, useMap } from 'react-leaflet'
 import { AlertTriangle, Clock, CheckCircle, XCircle, Loader2, Sparkles, RefreshCw, TrendingUp, Zap, Map, Navigation } from 'lucide-react'
 import { incidentService, zoneService, aiService } from '@/Services/Services'
 import 'leaflet/dist/leaflet.css'
@@ -31,7 +31,7 @@ const userIcon = L.divIcon({
 })
 
 function FlyTo({ coords }) {
-  const map = L.useMap()
+  const map = useMap()
   useEffect(() => { if (coords) map.flyTo(coords, 16, { animate: true, duration: 1.5 }) }, [coords])
   return null
 }
