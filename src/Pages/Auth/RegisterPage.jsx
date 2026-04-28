@@ -15,7 +15,7 @@ export default function RegisterPage() {
     try {
       await authService.register(data)
       toast.success('¡Registro exitoso! Ya puedes iniciar sesión')
-      navigate('/login')
+      navigate('/Login')
     } catch (err) {
       const status = err?.response?.status
       const message = err?.response?.data?.message || ''
@@ -99,7 +99,7 @@ export default function RegisterPage() {
           </form>
           <p className="text-center text-sm text-white/60 mt-5">
             ¿Ya tienes cuenta?{' '}
-            <Link to="/login" className="text-blue-400 font-semibold hover:underline">Inicia sesión</Link>
+            <Link to="/Login" className="text-blue-400 font-semibold hover:underline">Inicia sesión</Link>
           </p>
         </div>
       </div>

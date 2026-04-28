@@ -24,13 +24,13 @@ import CitizenProfile   from '@/Pages/Citizen/CitizenProfile'
 
 const PrivateRoute = ({ children }) => {
   const { token } = useAuthStore()
-  return token ? children : <Navigate to="/login" replace />
+  return token ? children : <Navigate to="/Login" replace />
 }
 
 const AdminRoute = ({ children }) => {
   const { token, isAdmin } = useAuthStore()
-  if (!token) return <Navigate to="/login" replace />
-  if (!isAdmin()) return <Navigate to="/app" replace />
+  if (!token) return <Navigate to="/Login" replace />
+  if (!isAdmin()) return <Navigate to="/App" replace />
   return children
 }
 
@@ -38,26 +38,26 @@ export default function App() {
   return (
     <Routes>
       <Route path="/"         element={<LandingPage />} />
-      <Route path="/login"    element={<LoginPage />} />
-      <Route path="/register" element={<RegisterPage />} />
+      <Route path="/Login"    element={<LoginPage />} />
+      <Route path="/Register" element={<RegisterPage />} />
 
-      <Route path="/app" element={<PrivateRoute><CitizenLayout /></PrivateRoute>}>
+      <Route path="/App" element={<PrivateRoute><CitizenLayout /></PrivateRoute>}>
         <Route index              element={<CitizenHome />} />
-        <Route path="incidents"   element={<CitizenIncidents />} />
-        <Route path="map"         element={<CitizenMap />} />
-        <Route path="emergency"   element={<CitizenEmergency />} />
-        <Route path="analytics"   element={<CitizenReports />} />
-        <Route path="profile"     element={<CitizenProfile />} />
+        <Route path="Incidents"   element={<CitizenIncidents />} />
+        <Route path="Map"         element={<CitizenMap />} />
+        <Route path="Emergency"   element={<CitizenEmergency />} />
+        <Route path="Analytics"   element={<CitizenReports />} />
+        <Route path="Profile"     element={<CitizenProfile />} />
       </Route>
 
-      <Route path="/admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
+      <Route path="/Admin" element={<AdminRoute><AdminLayout /></AdminRoute>}>
         <Route index              element={<AdminDashboard />} />
-        <Route path="incidents"   element={<AdminIncidents />} />
-        <Route path="zones"       element={<AdminZones />} />
-        <Route path="logs"        element={<AdminLogs />} />
-        <Route path="emergency"   element={<AdminEmergency />} />
-        <Route path="reports"     element={<AdminReports />} />
-        <Route path="ai"          element={<AdminAI />} />
+        <Route path="Incidents"   element={<AdminIncidents />} />
+        <Route path="Zones"       element={<AdminZones />} />
+        <Route path="Logs"        element={<AdminLogs />} />
+        <Route path="Emergency"   element={<AdminEmergency />} />
+        <Route path="Reports"     element={<AdminReports />} />
+        <Route path="Ai"          element={<AdminAI />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
