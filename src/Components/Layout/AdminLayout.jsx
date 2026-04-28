@@ -123,7 +123,7 @@ export default function AdminLayout() {
       {/* Main */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Top bar */}
-        <header style={{ height: 56, background: '#fff', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.04)' }}>
+        <header style={{ height: 56, background: '#fff', borderBottom: '1px solid #F1F5F9', display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '0 16px', flexShrink: 0, boxShadow: '0 1px 3px rgba(0,0,0,0.04)', zIndex: 3000 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
 
             {/* ✅ Botón hamburguesa — SIN display en style, Tailwind lo controla */}
