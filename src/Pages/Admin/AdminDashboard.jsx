@@ -241,6 +241,7 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
+        <div className="h-[250px] sm:h-[400px] relative z-0">
           <MapContainer center={CENTER} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
             <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
             {flyTo && <FlyTo coords={flyTo} />}
