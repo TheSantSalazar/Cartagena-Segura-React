@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet'
-import { AlertTriangle, Clock, CheckCircle, XCircle, Loader2, Sparkles, RefreshCw, TrendingUp, Zap, Map } from 'lucide-react'
+import { AlertTriangle, Clock, CheckCircle, XCircle, Loader2, Sparkles, RefreshCw, TrendingUp, Zap, Map, Navigation } from 'lucide-react'
 import { incidentService, zoneService, aiService } from '@/Services/Services'
 import 'leaflet/dist/leaflet.css'
 import L from 'leaflet'
@@ -21,6 +21,20 @@ const createIcon = color => L.divIcon({
   html: `<div style="width:22px;height:22px;background:${color};border:2px solid white;border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 2px 8px ${color}60"></div>`,
   iconSize: [22, 22], iconAnchor: [11, 22], popupAnchor: [0, -26],
 })
+
+const userIcon = L.divIcon({
+  className: '',
+  html: `<div style="position:relative;width:18px;height:18px">
+    <div style="width:18px;height:18px;background:#3B82F6;border:2px solid white;border-radius:50%;box-shadow:0 2px 6px rgba(59,130,246,0.5)"></div>
+  </div>`,
+  iconSize: [18, 18], iconAnchor: [9, 9],
+})
+
+function FlyTo({ coords }) {
+  const map = L.useMap()
+  useEffect(() => { if (coords) map.flyTo(coords, 16, { animate: true, duration: 1.5 }) }, [coords])
+  return null
+}
 
 function useCountUp(target, duration = 1200) {
   const [count, setCount] = useState(0)
@@ -95,6 +109,9 @@ export default function AdminDashboard() {
   const [sumLoading, setSumLoading] = useState(false)
   const [sumError, setSumError]   = useState(false)
   const [displayed, setDisplayed] = useState('')
+  const [userCoords, setUserCoords] = useState(null)
+  const [gpsLoading, setGpsLoading] = useState(false)
+  const [flyTo, setFlyTo]       = useState(null)
 
   useEffect(() => {
     Promise.all([incidentService.getAll(), zoneService.getAll()])
@@ -113,6 +130,16 @@ export default function AdminDashboard() {
     const t = setInterval(() => { i++; setDisplayed(summary.slice(0, i)); if (i >= summary.length) clearInterval(t) }, 14)
     return () => clearInterval(t)
   }, [summary])
+
+  const handleLocate = () => {
+    if (!navigator.geolocation) return
+    setGpsLoading(true)
+    navigator.geolocation.getCurrentPosition(
+      pos => { const c = [pos.coords.latitude, pos.coords.longitude]; setUserCoords(c); setFlyTo(c); setGpsLoading(false) },
+      () => setGpsLoading(false),
+      { enableHighAccuracy: true, timeout: 10000 }
+    )
+  }
 
   const genSummary = async () => {
     setSumLoading(true); setSumError(false); setSummary('')
@@ -214,9 +241,14 @@ export default function AdminDashboard() {
             </div>
           </div>
         </div>
-        <div className="h-[250px] sm:h-[400px] z-0">
           <MapContainer center={CENTER} zoom={13} style={{ height: '100%', width: '100%' }} scrollWheelZoom>
             <TileLayer attribution='&copy; OpenStreetMap' url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+            {flyTo && <FlyTo coords={flyTo} />}
+            {userCoords && (
+              <Marker position={userCoords} icon={userIcon}>
+                <Popup><p style={{ fontSize: 12, fontWeight: 700, color: '#3B82F6', margin: 0 }}>📍 Estás aquí</p></Popup>
+              </Marker>
+            )}
             {withCoords.map(inc => (
               <Marker key={inc.id} position={[inc.latitude, inc.longitude]} icon={createIcon(P_COLOR[inc.priority] ?? '#6B7280')}>
                 <Popup>
@@ -232,6 +264,13 @@ export default function AdminDashboard() {
               </Marker>
             ))}
           </MapContainer>
+
+          {/* GPS button */}
+          <button onClick={handleLocate} disabled={gpsLoading}
+            style={{ position: 'absolute', bottom: 12, right: 12, zIndex: 1000, display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 10, background: '#fff', border: '1px solid #E2E8F0', boxShadow: '0 4px 12px rgba(0,0,0,0.1)', cursor: 'pointer', fontFamily: 'inherit', fontSize: 12, fontWeight: 700, color: '#0F172A' }}>
+            {gpsLoading ? <Loader2 size={12} className="animate-spin" /> : <Navigation size={12} style={{ color: '#3B82F6' }} />}
+            <span>Mi ubicación</span>
+          </button>
         </div>
       </div>
 

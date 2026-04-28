@@ -165,11 +165,11 @@ export default function CitizenMap() {
           {gpsLoading
             ? <Loader2 size={14} style={{ color: '#3B82F6', animation: 'spin 1s linear infinite' }} />
             : <Navigation size={14} style={{ color: '#3B82F6' }} />}
-          <span>{userCoords ? 'Centrar' : 'Mi ubicación'}</span>
+          <span>Mi ubicación</span>
         </button>
 
         {/* Stats overlay */}
-        <div style={{ position: 'absolute', top: 12, left: 12, zIndex: 1000, display: 'flex', gap: 6 }}>
+        <div style={{ position: 'absolute', top: 60, left: 12, zIndex: 1000, display: 'flex', gap: 6 }}>
           {Object.entries(PRIORITY_COLOR).map(([lvl, color]) => {
             const count = displayed.filter(i => i.priority === lvl).length
             if (!count) return null
