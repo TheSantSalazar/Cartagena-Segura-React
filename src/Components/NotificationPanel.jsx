@@ -117,7 +117,7 @@ export default function NotificationPanel() {
 
       {/* Panel */}
       {open && (
-        <div className="animate-modal-in" style={{ position: 'absolute', right: 0, top: 44, width: 340, background: '#fff', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', border: '1px solid #F1F5F9', overflow: 'hidden', zIndex: 300 }}>
+        <div className="animate-modal-in" style={{ position: 'absolute', right: 0, top: 44, width: 340, background: '#fff', borderRadius: 20, boxShadow: '0 20px 60px rgba(0,0,0,0.15)', border: '1px solid #F1F5F9', overflow: 'hidden', zIndex: 2000 }}>
 
           {/* Header */}
           <div style={{ padding: '14px 16px', borderBottom: '1px solid #F8FAFC', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
