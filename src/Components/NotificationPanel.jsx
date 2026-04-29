@@ -23,32 +23,37 @@ export default function NotificationPanel() {
   const navigate              = useNavigate()
   const { isAdmin }           = useAuthStore()
 
-  // 1. Solicitar permisos de notificación al montar
-  useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default') {
-      Notification.requestPermission()
-    }
-  }, [])
-
+  // 1. Ya no pedimos permiso automáticamente al montar (los celulares lo bloquean)
+  
   // 2. Función para mostrar notificación nativa
   const showPush = (title, body, data) => {
-    if (!('Notification' in window) || Notification.permission !== 'granted') return
+    if (!('Notification' in window)) {
+      console.warn("Este navegador no soporta notificaciones de escritorio.")
+      return
+    }
 
-    const n = new Notification(title, {
-      body,
-      icon: '/LogoFull.png',
-      tag: 'cartagena-segura',
-      renotify: true
-    })
+    if (Notification.permission === 'granted') {
+      try {
+        const n = new Notification(title, {
+          body,
+          icon: '/LogoFull.png',
+          tag: 'cartagena-segura',
+          renotify: true
+        })
 
-    n.onclick = () => {
-      window.focus()
-      const incId = data?.relatedEntityId || data?.entityId
-      if (incId) {
-        const path = isAdmin() ? '/Admin/Incidents' : '/App/Incidents'
-        navigate(`${path}?id=${incId}`)
+        n.onclick = () => {
+          window.focus()
+          const incId = data?.relatedEntityId || data?.entityId
+          if (incId) {
+            const path = isAdmin() ? '/Admin/Incidents' : '/App/Incidents'
+            navigate(`${path}?id=${incId}`)
+          }
+          n.close()
+        }
+      } catch (e) {
+        // En algunos Android, new Notification falla y requiere Service Worker
+        console.error("Error al disparar notificación nativa:", e)
       }
-      n.close()
     }
   }
 
@@ -59,12 +64,11 @@ export default function NotificationPanel() {
         const r = await notificationService.countUnread()
         const count = Number(r.data?.data ?? 0)
 
-        // Si el número aumentó, buscamos la última para mostrar el "push"
-        if (count > prevUnreadRef.current) {
+        if (count > prevUnreadRef.current && prevUnreadRef.current !== 0) {
           const res = await notificationService.getUnread()
           const unreads = res.data?.data ?? []
           if (unreads.length > 0) {
-            const latest = unreads[0] // Asumimos que la primera es la más reciente
+            const latest = unreads[0]
             showPush(latest.title, latest.message, latest)
           }
         }
@@ -72,14 +76,11 @@ export default function NotificationPanel() {
         setUnread(count)
         prevUnreadRef.current = count
       } catch (err) {
-        console.error("Error polling notifications:", err)
+        // Silenciamos el log para no llenar la consola si hay errores de red
       }
     }
 
-    // Primera carga
     checkNew()
-
-    // Intervalo cada 15 segundos para una respuesta más rápida
     const interval = setInterval(checkNew, 15000)
     return () => clearInterval(interval)
   }, [isAdmin, navigate])
@@ -98,7 +99,22 @@ export default function NotificationPanel() {
       .finally(() => setLoading(false))
   }
 
-  const handleOpen = () => { setOpen(o => !o); if (!open) loadNotifs() }
+  const handleOpen = () => { 
+    setOpen(o => !o)
+    if (!open) {
+      loadNotifs()
+      // SOLICITAR PERMISO AQUÍ (Gesto de usuario)
+      if ('Notification' in window) {
+        if (Notification.permission === 'default') {
+          Notification.requestPermission().then(perm => {
+            if (perm === 'granted') toast.success('¡Notificaciones activadas!')
+          })
+        }
+      } else {
+        toast.error('Tu navegador no soporta notificaciones push')
+      }
+    }
+  }
 
   const markRead = async id => {
     try {

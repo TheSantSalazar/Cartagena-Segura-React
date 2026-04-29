@@ -442,7 +442,7 @@ export default function LandingPage() {
                 <Link to="/Register" className="bg-white text-blue-600 px-10 py-5 rounded-2xl font-black text-xl hover:scale-105 transition-all shadow-2xl">
                   Registrarme Gratis
                 </Link>
-                <Link to="/auth" className="bg-transparent border-2 border-white/30 text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg-white/10 transition-all">
+                <Link to="/Login" className="bg-transparent border-2 border-white/30 text-white px-10 py-5 rounded-2xl font-black text-xl hover:bg-white/10 transition-all">
                   Contactar Soporte
                 </Link>
               </div>
