@@ -13,6 +13,13 @@ const TYPE_ICON = {
   SYSTEM:                  '⚙️',
 }
 
+const STATUS_MAP = {
+  'PENDING': 'PENDIENTE',
+  'IN_PROGRESS': 'EN CURSO',
+  'RESOLVED': 'RESUELTO',
+  'REJECTED': 'RECHAZADO'
+}
+
 export default function NotificationPanel() {
   const [open, setOpen]       = useState(false)
   const [notifs, setNotifs]   = useState([])
@@ -27,13 +34,19 @@ export default function NotificationPanel() {
   
   // 2. Función para mostrar notificación nativa
   const showPush = (title, body, data) => {
+    // Traducir estados en el cuerpo del mensaje
+    let translatedBody = body
+    Object.keys(STATUS_MAP).forEach(key => {
+      translatedBody = translatedBody.replace(key, STATUS_MAP[key])
+    })
+
     // Si tenemos Service Worker, usamos su registro (mejor para móviles)
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.ready.then(reg => {
         reg.showNotification(title, {
-          body,
-          icon: '/LogoFull.png',
-          badge: '/LogoFull.png',
+          body: translatedBody,
+          icon: '/AppIcon.png',
+          badge: '/AppIcon.png',
           vibrate: [100, 50, 100],
           tag: 'cartagena-segura',
           renotify: true,
@@ -46,7 +59,12 @@ export default function NotificationPanel() {
     // Fallback para navegadores antiguos o si el SW falla
     if (Notification.permission === 'granted') {
       try {
-        new Notification(title, { body, icon: '/LogoFull.png', tag: 'cartagena-segura', renotify: true });
+        new Notification(title, { 
+          body: translatedBody, 
+          icon: '/AppIcon.png', 
+          tag: 'cartagena-segura', 
+          renotify: true 
+        });
       } catch (e) {
         console.error("Error al disparar notificación nativa:", e);
       }

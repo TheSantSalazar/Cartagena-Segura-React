@@ -29,8 +29,8 @@ self.addEventListener('push', (event) => {
 
   const options = {
     body: data.message,
-    icon: '/LogoFull.png',
-    badge: '/LogoFull.png',
+    icon: '/AppIcon.png',
+    badge: '/AppIcon.png',
     vibrate: [100, 50, 100],
     data: data,
     tag: 'cartagena-segura-notif',

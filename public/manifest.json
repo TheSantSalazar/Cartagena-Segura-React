@@ -8,13 +8,13 @@
       "type": "image/x-icon"
     },
     {
-      "src": "LogoFull.png",
+      "src": "AppIcon.png",
       "type": "image/png",
       "sizes": "192x192",
       "purpose": "any maskable"
     },
     {
-      "src": "LogoFull.png",
+      "src": "AppIcon.png",
       "type": "image/png",
       "sizes": "512x512"
     }
