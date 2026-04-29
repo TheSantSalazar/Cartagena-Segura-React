@@ -27,32 +27,28 @@ export default function NotificationPanel() {
   
   // 2. Función para mostrar notificación nativa
   const showPush = (title, body, data) => {
-    if (!('Notification' in window)) {
-      console.warn("Este navegador no soporta notificaciones de escritorio.")
-      return
-    }
-
-    if (Notification.permission === 'granted') {
-      try {
-        const n = new Notification(title, {
+    // Si tenemos Service Worker, usamos su registro (mejor para móviles)
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(reg => {
+        reg.showNotification(title, {
           body,
           icon: '/LogoFull.png',
+          badge: '/LogoFull.png',
+          vibrate: [100, 50, 100],
           tag: 'cartagena-segura',
-          renotify: true
-        })
+          renotify: true,
+          data: data
+        });
+      });
+      return;
+    }
 
-        n.onclick = () => {
-          window.focus()
-          const incId = data?.relatedEntityId || data?.entityId
-          if (incId) {
-            const path = isAdmin() ? '/Admin/Incidents' : '/App/Incidents'
-            navigate(`${path}?id=${incId}`)
-          }
-          n.close()
-        }
+    // Fallback para navegadores antiguos o si el SW falla
+    if (Notification.permission === 'granted') {
+      try {
+        new Notification(title, { body, icon: '/LogoFull.png', tag: 'cartagena-segura', renotify: true });
       } catch (e) {
-        // En algunos Android, new Notification falla y requiere Service Worker
-        console.error("Error al disparar notificación nativa:", e)
+        console.error("Error al disparar notificación nativa:", e);
       }
     }
   }
@@ -75,13 +71,11 @@ export default function NotificationPanel() {
         
         setUnread(count)
         prevUnreadRef.current = count
-      } catch (err) {
-        // Silenciamos el log para no llenar la consola si hay errores de red
-      }
+      } catch (err) { }
     }
 
     checkNew()
-    const interval = setInterval(checkNew, 15000)
+    const interval = setInterval(checkNew, 10000) // 10 segundos
     return () => clearInterval(interval)
   }, [isAdmin, navigate])
 
