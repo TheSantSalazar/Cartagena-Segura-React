@@ -19,18 +19,70 @@ export default function NotificationPanel() {
   const [unread, setUnread]   = useState(0)
   const [loading, setLoading] = useState(false)
   const panelRef              = useRef(null)
+  const prevUnreadRef         = useRef(0)
   const navigate              = useNavigate()
   const { isAdmin }           = useAuthStore()
 
+  // 1. Solicitar permisos de notificación al montar
   useEffect(() => {
-    notificationService.countUnread()
-      .then(r => {
-        // Tu backend devuelve ApiResponse con el número en .data
-        const count = r.data?.data ?? 0
-        setUnread(Number(count))
-      })
-      .catch(() => {})
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission()
+    }
   }, [])
+
+  // 2. Función para mostrar notificación nativa
+  const showPush = (title, body, data) => {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return
+
+    const n = new Notification(title, {
+      body,
+      icon: '/LogoFull.png',
+      tag: 'cartagena-segura',
+      renotify: true
+    })
+
+    n.onclick = () => {
+      window.focus()
+      const incId = data?.relatedEntityId || data?.entityId
+      if (incId) {
+        const path = isAdmin() ? '/Admin/Incidents' : '/App/Incidents'
+        navigate(`${path}?id=${incId}`)
+      }
+      n.close()
+    }
+  }
+
+  // 3. Polling para nuevas notificaciones
+  useEffect(() => {
+    const checkNew = async () => {
+      try {
+        const r = await notificationService.countUnread()
+        const count = Number(r.data?.data ?? 0)
+
+        // Si el número aumentó, buscamos la última para mostrar el "push"
+        if (count > prevUnreadRef.current) {
+          const res = await notificationService.getUnread()
+          const unreads = res.data?.data ?? []
+          if (unreads.length > 0) {
+            const latest = unreads[0] // Asumimos que la primera es la más reciente
+            showPush(latest.title, latest.message, latest)
+          }
+        }
+        
+        setUnread(count)
+        prevUnreadRef.current = count
+      } catch (err) {
+        console.error("Error polling notifications:", err)
+      }
+    }
+
+    // Primera carga
+    checkNew()
+
+    // Intervalo cada 15 segundos para una respuesta más rápida
+    const interval = setInterval(checkNew, 15000)
+    return () => clearInterval(interval)
+  }, [isAdmin, navigate])
 
   useEffect(() => {
     const handler = e => { if (panelRef.current && !panelRef.current.contains(e.target)) setOpen(false) }
