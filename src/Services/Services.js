@@ -4,6 +4,8 @@ import api from './Api'
 export const authService = {
   login:    (data) => api.post('/Auth/Login', data),
   register: (data) => api.post('/Auth/Register', data),
+  forgotPassword: (data) => api.post('/Auth/ForgotPassword', data),
+  resetPassword:  (data) => api.post('/Auth/ResetPassword', data),
 }
 
 // ── INCIDENTS ─────────────────────────────────────────────────────────────

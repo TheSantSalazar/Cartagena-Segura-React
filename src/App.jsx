@@ -4,6 +4,8 @@ import useAuthStore from '@/Store/AuthStore'
 import LandingPage from '@/Pages/LandingPage'
 import LoginPage    from '@/Pages/Auth/LoginPage'
 import RegisterPage from '@/Pages/Auth/RegisterPage'
+import ForgotPasswordPage from '@/Pages/Auth/ForgotPasswordPage'
+import ResetPasswordPage  from '@/Pages/Auth/ResetPasswordPage'
 
 import AdminLayout    from '@/Components/Layout/AdminLayout'
 import AdminDashboard from '@/Pages/Admin/AdminDashboard'
@@ -40,6 +42,8 @@ export default function App() {
       <Route path="/"         element={<LandingPage />} />
       <Route path="/Login"    element={<LoginPage />} />
       <Route path="/Register" element={<RegisterPage />} />
+      <Route path="/ForgotPassword" element={<ForgotPasswordPage />} />
+      <Route path="/ResetPassword"  element={<ResetPasswordPage />} />
 
       <Route path="/App" element={<PrivateRoute><CitizenLayout /></PrivateRoute>}>
         <Route index              element={<CitizenHome />} />

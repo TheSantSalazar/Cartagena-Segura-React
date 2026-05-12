@@ -102,6 +102,11 @@ export default function LoginPage() {
               </div>
               {errors.password && <p className="text-red-400 text-xs mt-1">{errors.password.message}</p>}
             </div>
+            <div className="flex justify-end">
+              <Link to="/ForgotPassword" id="forgot-password-link" className="text-xs text-blue-400 hover:underline">
+                ¿Olvidaste tu contraseña?
+              </Link>
+            </div>
             <button type="submit" disabled={loading}
               className="w-full mt-2 px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-xl transition-all duration-200 disabled:opacity-50 flex items-center justify-center gap-2">
               {loading && <Loader2 className="w-4 h-4 animate-spin" />}
